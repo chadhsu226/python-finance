@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Python 與金融資料分析</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  body { background:#f8fafc; }
+  .unit { display:block; background:#fff; border:1px solid #e2e8f0; border-radius:16px; padding:1.25rem 1.4rem;
+          transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease; position:relative; overflow:hidden; }
+  .unit:hover { transform:translateY(-3px); box-shadow:0 18px 36px -16px rgba(30,58,138,.35); border-color:#bfdbfe; }
+  .unit .num { font-family:Consolas, monospace; font-size:.8rem; letter-spacing:.15em; color:#2563eb; font-weight:700; }
+  .unit .go { color:#1d4ed8; font-weight:700; font-size:.9rem; }
+  .unit:hover .go span { transform:translateX(4px); }
+  .go span { display:inline-block; transition:transform .2s ease; }
+  .code { background:#1e1e1e; color:#d4d4d4; font-family:Consolas, "Courier New", monospace; font-size:.92rem;
+          line-height:1.6; padding:1rem 1.2rem; border-radius:10px; white-space:pre; overflow-x:auto; }
+  .code .s { color:#ce9178; } .code .k { color:#569cd6; }
+  .kicker { font-size:.75rem; letter-spacing:.2em; font-weight:600; color:#94a3b8; text-transform:uppercase; }
+  table.d { width:100%; border-collapse:collapse; font-size:.95rem; }
+  table.d th { text-align:left; background:#eff6ff; color:#1e3a8a; padding:.5rem .75rem; }
+  table.d td { border-bottom:1px solid #e5e7eb; padding:.5rem .75rem; vertical-align:top; }
+  code.i { background:#eef2ff; color:#3730a3; padding:0 .3rem; border-radius:.25rem; font-family:Consolas, monospace; }
+  .copy { font-size:.8rem; background:#1e3a8a; color:#fff; padding:.25rem .7rem; border-radius:999px; }
+</style>
+</head>
+<body class="text-gray-800">
+<header class="bg-gradient-to-br from-blue-900 to-indigo-700 text-white">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 py-10">
+    <a href="https://chadhsu226.github.io/" class="text-blue-200 text-sm hover:text-white">← 回到首頁</a>
+    <h1 class="text-3xl sm:text-4xl font-extrabold mt-3">Python 與金融資料分析</h1>
+    <p class="mt-3 text-blue-100 max-w-2xl leading-relaxed">從 Python 基礎、pandas 資料整理，到報酬率、風險衡量與策略回測。在 AI 時代，你是分析師、AI 是助理：重點是讀懂程式、預測輸出、判斷對錯，並解釋背後的財金意義。</p>
+    <p class="mt-4 text-sm text-blue-200">銘傳大學財務金融學系．115 學年度第 1 學期．許智翔</p>
+  </div>
+</header>
+
+<main class="max-w-5xl mx-auto px-4 sm:px-6 py-10">
+  <section class="mb-12">
+    <div class="flex items-baseline gap-4 mb-4"><h2 class="kicker">課程講義 / UNITS</h2><div class="h-px flex-1 bg-gray-200"></div></div>
+    <div class="grid sm:grid-cols-2 gap-4">
+      <a class="unit" href="Unit01_PythonBasic.html"><div class="num">UNIT 01</div><h3 class="text-lg font-bold text-gray-900 mt-1">Python 基礎</h3><p class="text-sm text-gray-600 mt-1 leading-relaxed">型態、運算、賦值／比較／邏輯、字串、list、dict。</p><div class="go mt-3">開啟講義 <span>→</span></div></a>
+      <a class="unit" href="Unit02_ControlFlow_Function.html"><div class="num">UNIT 02</div><h3 class="text-lg font-bold text-gray-900 mt-1">流程控制與函式</h3><p class="text-sm text-gray-600 mt-1 leading-relaxed">if、for、while、def。</p><div class="go mt-3">開啟講義 <span>→</span></div></a>
+      <a class="unit" href="Unit03_PandasIntro.html"><div class="num">UNIT 03</div><h3 class="text-lg font-bold text-gray-900 mt-1">pandas 入門（橫斷面）</h3><p class="text-sm text-gray-600 mt-1 leading-relaxed">Series、index 與欄的差別、loc／iloc、index 對齊、檔案編碼。</p><div class="go mt-3">開啟講義 <span>→</span></div></a>
+      <a class="unit" href="Unit04_PandasCleaning.html"><div class="num">UNIT 04</div><h3 class="text-lg font-bold text-gray-900 mt-1">pandas 資料整理</h3><p class="text-sm text-gray-600 mt-1 leading-relaxed">選股篩選、新增欄位、groupby 產業、缺值處理、原始檔清理。</p><div class="go mt-3">開啟講義 <span>→</span></div></a>
+      <a class="unit" href="Unit05_TimeSeries_Returns.html"><div class="num">UNIT 05</div><h3 class="text-lg font-bold text-gray-900 mt-1">時間序列與報酬率</h3><p class="text-sm text-gray-600 mt-1 leading-relaxed">日期 index、shift、pct_change、累積報酬、Close vs Adj Close、寬格式與走勢圖。</p><div class="go mt-3">開啟講義 <span>→</span></div></a>
+      <a class="unit" href="Unit06_Risk.html"><div class="num">UNIT 06</div><h3 class="text-lg font-bold text-gray-900 mt-1">風險衡量</h3><p class="text-sm text-gray-600 mt-1 leading-relaxed">年化波動度、rolling、最大回撤、相關係數與分散效果。</p><div class="go mt-3">開啟講義 <span>→</span></div></a>
+      <a class="unit" href="Unit07_Backtest.html"><div class="num">UNIT 07</div><h3 class="text-lg font-bold text-gray-900 mt-1">策略回測</h3><p class="text-sm text-gray-600 mt-1 leading-relaxed">均線訊號與部位、look-ahead bias、交易成本、樣本內／外與過度最佳化。</p><div class="go mt-3">開啟講義 <span>→</span></div></a>
+    </div>
+  </section>
+
+  <section>
+    <div class="flex items-baseline gap-4 mb-4"><h2 class="kicker">課程資料 / DATA</h2><div class="h-px flex-1 bg-gray-200"></div></div>
+    <div class="bg-white border border-gray-200 rounded-2xl p-5 sm:p-6">
+      <p class="leading-relaxed">課程資料都放在網站上，在 Colab 裡直接用網址讀取，不需要上傳檔案：</p>
+      <div class="flex justify-end mt-3 mb-1"><button class="copy" id="copyBtn">複製程式碼</button></div>
+      <div class="code" id="snippet"><span class="k">import</span> pandas <span class="k">as</span> pd
+
+DATA_URL = <span class="s">"https://chadhsu226.github.io/python-finance/data/"</span>
+df = pd.read_csv(DATA_URL + <span class="s">"2330.csv"</span>, parse_dates=[<span class="s">"Date"</span>])</div>
+      <div class="overflow-x-auto mt-5">
+        <table class="d">
+          <thead><tr><th>檔案</th><th>內容</th><th>單元</th></tr></thead>
+          <tbody>
+            <tr><td><a class="text-blue-700 hover:underline" href="data/mini_stocks.csv">mini_stocks.csv</a></td><td>練習用虛構資料，6 家公司的產業、股價、EPS、殖利率</td><td>3、4</td></tr>
+            <tr><td><a class="text-blue-700 hover:underline" href="data/tw_valuation.csv">tw_valuation.csv</a></td><td>證交所 31 檔大型股本益比、殖利率、股價淨值比（已整理）</td><td>3、4</td></tr>
+            <tr><td><a class="text-blue-700 hover:underline" href="data/tw_valuation_raw.csv">tw_valuation_raw.csv</a></td><td>同上資料的證交所原始格式</td><td>4</td></tr>
+            <tr><td><a class="text-blue-700 hover:underline" href="data/mini_prices.csv">mini_prices.csv</a></td><td>練習用虛構資料，2 檔股票 × 10 天</td><td>5 起</td></tr>
+            <tr><td><a class="text-blue-700 hover:underline" href="data/2330.csv">2330.csv</a></td><td>台積電日資料</td><td>5</td></tr>
+            <tr><td><a class="text-blue-700 hover:underline" href="data/tw_stocks_long.csv">tw_stocks_long.csv</a></td><td>4 檔股票日資料（長格式）</td><td>5、6</td></tr>
+            <tr><td><a class="text-blue-700 hover:underline" href="data/2330_dirty.csv">2330_dirty.csv</a></td><td>保留常見資料問題的台積電資料</td><td>5</td></tr>
+            <tr><td><a class="text-blue-700 hover:underline" href="data/adj_close_wide.csv">adj_close_wide.csv</a></td><td>4 檔股票還原收盤價（寬格式）</td><td>5–7</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="text-sm text-gray-500 mt-4">欄位定義與注意事項見 <a class="text-blue-700 hover:underline" href="https://github.com/chadhsu226/python-finance/blob/main/data/%E8%B3%87%E6%96%99%E8%AA%AA%E6%98%8E.md" target="_blank">資料說明</a>。</p>
+    </div>
+  </section>
+</main>
+
+<footer class="text-center text-sm text-gray-400 py-8">© 許智翔．銘傳大學財務金融學系</footer>
+<script>
+document.getElementById('copyBtn').addEventListener('click', function () {
+  var t = document.getElementById('snippet').innerText;
+  var b = this;
+  navigator.clipboard.writeText(t).then(function () { b.textContent = '已複製'; setTimeout(function () { b.textContent = '複製程式碼'; }, 1500); });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>單元 3 pandas 入門</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  html, body { margin:0; padding:0; height:100%; overflow:hidden; background:#f3f4f6; }
+  .slides-container { position:relative; width:100vw; height:100vh; overflow:hidden; }
+  .slide-page { position:absolute; inset:0; opacity:0; visibility:hidden; transition:opacity .35s ease; z-index:10;
+                display:flex; align-items:center; justify-content:center; padding:2rem 2rem 5rem; }
+  .slide-page.active { opacity:1; visibility:visible; z-index:20; }
+  .content-card { background:#fff; border-radius:1rem; box-shadow:0 10px 15px rgba(0,0,0,.1);
+                  width:100%; max-width:1100px; max-height:100%; overflow-y:auto; padding:2.25rem 2.75rem; }
+  .code-block { background:#1e1e1e; color:#d4d4d4; padding:1rem 1.25rem; border-radius:.5rem;
+                font-family:Consolas, "Courier New", monospace; font-size:1.05rem; line-height:1.6;
+                white-space:pre; overflow-x:auto; }
+  .cm { color:#6a9955; }
+  .h-title { font-size:1.8rem; font-weight:800; color:#1e3a8a; margin-bottom:.8rem; }
+  table.t { width:100%; border-collapse:collapse; font-size:1.05rem; }
+  table.t th { background:#1e3a8a; color:#fff; padding:.5rem .75rem; text-align:left; }
+  table.t td { border-bottom:1px solid #e5e7eb; padding:.5rem .75rem; vertical-align:top; }
+  code.i { background:#eef2ff; color:#3730a3; padding:0 .3rem; border-radius:.25rem; font-family:Consolas, monospace; }
+  /* 預測輸出卡片 */
+  .pq { border:2px solid #f59e0b; border-radius:.75rem; padding:1rem 1.25rem; margin-bottom:1rem; background:#fffbeb; }
+  .pq-head { font-weight:700; color:#b45309; margin-bottom:.5rem; }
+  .pq .code-block { font-size:.9rem; padding:.55rem .9rem; line-height:1.5; }
+  .pq { padding:.8rem 1.1rem; margin-bottom:.4rem; }
+  .pq input { width:100%; border:1px solid #d1d5db; border-radius:.4rem; padding:.25rem .6rem; margin-top:.45rem;
+              font-family:Consolas, monospace; font-size:1rem; background:#fff; }
+  .pq button { margin-top:.6rem; background:#b45309; color:#fff; padding:.35rem .9rem; border-radius:.4rem; font-size:.95rem; }
+  .pq button:hover { background:#92400e; }
+  .ans { display:none; margin-top:.6rem; background:#ecfdf5; border-left:4px solid #059669; padding:.6rem .9rem; border-radius:.3rem; }
+  .ans.show { display:block; }
+  .ans .out { font-family:Consolas, monospace; font-weight:700; color:#065f46; white-space:pre; }
+  .warn { border-left:6px solid #dc2626; background:#fef2f2; padding:.9rem 1.1rem; border-radius:.4rem; margin-bottom:.9rem; }
+  .nav { position:fixed; bottom:1rem; left:50%; transform:translateX(-50%); z-index:50; display:flex; gap:1rem; align-items:center;
+         background:rgba(255,255,255,.95); padding:.5rem 1rem; border-radius:999px; box-shadow:0 4px 10px rgba(0,0,0,.12); }
+  .nav button { background:#1e3a8a; color:#fff; padding:.35rem 1rem; border-radius:999px; }
+  .nav button:disabled { background:#9ca3af; }
+  .tag { display:inline-block; font-size:.8rem; font-weight:700; padding:.1rem .6rem; border-radius:999px; margin-right:.4rem; }
+</style>
+</head>
+<body class="font-sans text-gray-800">
+<div class="slides-container" id="slides">
+
+<!-- 0 封面 -->
+<div class="slide-page active">
+  <div class="content-card text-center" style="padding:4rem 3rem;">
+    <p class="text-lg text-gray-500 mb-2">R 與 Python Finance 計算｜115 學年度第 1 學期｜單元 3</p>
+    <h1 class="text-5xl font-extrabold text-blue-900 mb-4">pandas 入門</h1>
+    <p class="text-2xl text-gray-700 mb-8">Series・DataFrame・index（以橫斷面資料為例）</p>
+    <div class="inline-block text-left bg-amber-50 border-2 border-amber-400 rounded-xl px-6 py-4">
+      <p class="font-bold text-amber-800 mb-1">🔍 本單元的預測輸出重點</p>
+      <p>取出來的是<b>一個值、一個 Series，還是一張表</b>？這個 Series 的 <b>index 是什麼</b>？兩個 Series 相除時，<b>誰跟誰配對</b>？</p>
+    </div>
+    <p class="mt-8 text-gray-500">← → 鍵或下方按鈕換頁</p>
+  </div>
+</div>
+
+<!-- 1 本單元問題 -->
+<div class="slide-page">
+  <div class="content-card">
+    <div class="h-title">本單元的財金問題</div>
+    <div class="bg-blue-900 text-white rounded-xl p-5 text-xl mb-6">
+      「2026 年 9 月 30 日收盤後，想比較 31 檔台股大型股：<b>台積電的本益比是幾倍？哪一檔殖利率最高？</b>每一檔的資料要怎麼存、怎麼查？」
+    </div>
+    <div class="grid md:grid-cols-2 gap-6 text-lg">
+      <div>
+        <p class="font-bold text-blue-900 mb-2">兩種財金資料</p>
+        <table class="t">
+          <tr><th></th><th>橫斷面資料</th><th>時間序列資料</th></tr>
+          <tr><td>內容</td><td><b>同一時間、很多家公司</b></td><td>同一家公司、很多個時間點</td></tr>
+          <tr><td>一列是</td><td>一家公司</td><td>一天（一個月）</td></tr>
+          <tr><td>index</td><td>股票代碼、公司名稱</td><td>日期</td></tr>
+          <tr><td>例子</td><td>今天各股的本益比、殖利率</td><td>台積電每天的股價</td></tr>
+          <tr><td>單元</td><td><b>單元 3、4</b></td><td>單元 5 以後</td></tr>
+        </table>
+      </div>
+      <div>
+        <p class="font-bold text-blue-900 mb-2">本單元使用的資料（直接從課程網站讀取）</p>
+        <table class="t">
+          <tr><th>檔案</th><th>內容</th></tr>
+          <tr><td><code class="i">mini_stocks.csv</code></td><td>虛構 6 家公司（Apex～Fleet），數字好手算</td></tr>
+          <tr><td><code class="i">tw_valuation.csv</code></td><td>證交所 2026/09/30 公布的 31 檔大型股本益比、殖利率、股價淨值比</td></tr>
+        </table>
+        <p class="mt-3 bg-blue-50 border-l-4 border-blue-700 p-3 rounded">💡 本單元的核心觀念是 <b>index（索引）</b>：每一列的「名字」。用公司當 index 最直覺——「台積電那一列」。</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 2 Series -->
+<div class="slide-page">
+  <div class="content-card">
+    <div class="h-title">1. Series：有「名字」的一串資料</div>
+    <div class="grid md:grid-cols-2 gap-6">
+      <div>
+        <div class="code-block" style="font-size:.95rem;">import pandas as pd
+
+<span class="cm"># 四位同學的帳戶餘額（萬元）</span>
+names = ["Alice", "Bill", "Cathy", "David"]
+bal = pd.Series([100, 50, 30, 20], index=names)
+print(bal)</div>
+        <div class="code-block mt-3" style="font-size:.95rem;">Alice    100
+Bill      50
+Cathy     30
+David     20
+dtype: int64</div>
+        <p class="mt-2 text-base">左邊一欄是 <b>index</b>（名字），右邊是 <b>values</b>（值）。</p>
+      </div>
+      <div class="text-lg">
+        <table class="t mb-3">
+          <tr><th>寫法</th><th>意思</th><th>結果</th></tr>
+          <tr><td><code class="i">bal["Cathy"]</code></td><td>用<b>名字</b>取值</td><td>30</td></tr>
+          <tr><td><code class="i">bal.iloc[0]</code></td><td>用<b>位置</b>取值</td><td>100</td></tr>
+          <tr><td><code class="i">bal.index</code></td><td>所有名字</td><td>Alice、Bill、Cathy、David</td></tr>
+          <tr><td><code class="i">bal.max()</code></td><td>最大值</td><td>100</td></tr>
+          <tr><td><code class="i">bal.idxmax()</code></td><td>最大值的<b>名字</b></td><td>Alice</td></tr>
+        </table>
+        <p class="bg-blue-50 border-l-4 border-blue-700 p-3 rounded mb-3">💡 Series = list（單元 1）＋ 每個值都有名字。很像 dict：<code class="i">bal["Cathy"]</code> 和 <code class="i">stock["price"]</code> 的取法一樣。</p>
+        <p>⚠️ 如果沒有指定 index，pandas 會自動給 <b>0, 1, 2, …</b>，這時「名字」剛好等於「位置」，很容易混淆。</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 3 預測輸出 1 -->
+<div class="slide-page">
+  <div class="content-card">
+    <div class="h-title">🔍 預測輸出 1：Series</div>
+    <p class="mb-3 text-lg">各題使用：<code class="i">s = pd.Series([100, 50, 30, 20], index=["Alice", "Bill", "Cathy", "David"])</code></p>
+    <div class="grid md:grid-cols-2 gap-4">
+      <div class="pq"><div class="pq-head">Q1</div>
+<div class="code-block">print(s["Cathy"], s.iloc[0])</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">30 100</span><br>一個用名字、一個用位置。</div>
+      </div>
+      <div class="pq"><div class="pq-head">Q2</div>
+<div class="code-block">print(len(s), s.max(), s.idxmax())</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">4 100 Alice</span><br><code class="i">idxmax()</code> 回傳的是<b>名字</b>，不是 100。</div>
+      </div>
+      <div class="pq"><div class="pq-head">Q3</div>
+<div class="code-block">print(s[["Alice", "David"]].sum())</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">120</span><br>用一個 list 一次取好幾個名字：100 + 20。</div>
+      </div>
+      <div class="pq"><div class="pq-head">Q4</div>
+<div class="code-block">t = pd.Series([100, 50, 30])
+print(t[1], t.index.tolist())</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">50 [0, 1, 2]</span><br>沒指定 index，自動給 0、1、2；<code class="i">t[1]</code> 是名字為 1 的值。</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 4 DataFrame 與 index -->
+<div class="slide-page">
+  <div class="content-card">
+    <div class="h-title">2. DataFrame：列有名字（index），欄也有名字（columns）</div>
+    <div class="grid md:grid-cols-2 gap-6">
+      <div>
+        <div class="code-block" style="font-size:.74rem;"><span class="cm"># 課程資料放在網站上，不需上傳檔案</span>
+DATA_URL = "https://chadhsu226.github.io/python-finance/data/"
+df = pd.read_csv(DATA_URL + "mini_stocks.csv",
+                 index_col="Name")   <span class="cm"># 公司名當 index</span>
+print(df)</div>
+        <div class="code-block mt-3" style="font-size:.92rem;">       Industry  Close  EPS  DivYield
+Name                                 
+Apex       Tech    100    5       2.0
+Bolt       Tech     50    2       3.0
+Crown   Finance     30    2       5.0
+Delta   Finance     20    1       4.0
+Echo   Shipping     60   -3       0.0
+Fleet  Shipping     40    4       6.0</div>
+        <p class="mt-2 text-base">Close：股價（元）；EPS：每股盈餘（元）；DivYield：殖利率（%）</p>
+        <p class="mt-1 text-base">💡 <code class="i">DATA_URL + "mini_stocks.csv"</code> 就是單元 1 的字串串接，得到完整網址，pandas 會直接從網路讀檔。</p>
+      </div>
+      <div class="text-lg">
+        <p class="font-bold text-blue-900 mb-2">從一張表取出 Series 的兩個方向</p>
+        <table class="t mb-3">
+          <tr><th></th><th>取一欄 <code class="i">df["Close"]</code></th><th>取一列 <code class="i">df.loc["Apex"]</code></th></tr>
+          <tr><td>意思</td><td>所有公司的股價</td><td>Apex 公司的所有資料</td></tr>
+          <tr><td>得到</td><td>Series</td><td>Series</td></tr>
+          <tr><td>它的 index</td><td><b>公司名</b>：Apex～Fleet</td><td><b>欄名</b>：Industry、Close…</td></tr>
+        </table>
+        <p class="bg-red-50 border-l-4 border-red-600 p-3 rounded"><b>本單元最重要的觀念：</b><br><code class="i">df["Close"]</code> 的中括號裡放的是<b>欄名</b>；<code class="i">df.loc["Apex"]</code> 裡放的是 <b>index（列的名字）</b>。<br>寫 <code class="i">df["Apex"]</code> 會出現 <code class="i">KeyError</code>，因為沒有一欄叫「Apex」。</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 5 預測輸出 2 -->
+<div class="slide-page">
+  <div class="content-card">
+    <div class="h-title">🔍 預測輸出 2：index 與欄位</div>
+    <p class="mb-3 text-lg">使用上一頁的 <code class="i">df</code>（index 是公司名 Apex～Fleet）</p>
+    <div class="grid md:grid-cols-2 gap-4">
+      <div class="pq"><div class="pq-head">Q1</div>
+<div class="code-block">print(df.shape)</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">(6, 4)</span><br>Name 變成 index，<b>不算一欄</b>；剩下 4 欄。</div>
+      </div>
+      <div class="pq"><div class="pq-head">Q2</div>
+<div class="code-block">a = df.loc["Crown", "Close"]
+b = df["EPS"]["Delta"]
+print(a, b)</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">30 1</span><br>兩種寫法都能取到單一格：先列後欄，或先欄後列。</div>
+      </div>
+      <div class="pq"><div class="pq-head">Q3</div>
+<div class="code-block">print(df.loc["Apex"].index.tolist())</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">['Industry', 'Close', 'EPS', 'DivYield']</span><br>取出「一列」得到的 Series，它的 index 是<b>欄名</b>。</div>
+      </div>
+      <div class="pq"><div class="pq-head">Q4</div>
+<div class="code-block">print(df["EPS"].idxmax(), df["DivYield"].idxmax())</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">Apex Fleet</span><br>取出「一欄」得到的 Series，它的 index 是<b>公司名</b>，所以 idxmax 回傳公司名。</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 6 loc / iloc -->
+<div class="slide-page">
+  <div class="content-card">
+    <div class="h-title">3. loc（用名字）vs. iloc（用位置）</div>
+    <div class="grid md:grid-cols-2 gap-6">
+      <div>
+        <div class="code-block" style="font-size:.92rem;"><span class="cm"># loc：用 index 名字與欄名</span>
+df.loc["Bolt"]                    <span class="cm"># 一列</span>
+df.loc["Bolt", "Close"]           <span class="cm"># 一格</span>
+df.loc[["Apex", "Crown"], ["Close", "EPS"]]
+df.loc["Bolt":"Delta", "Close"]       <span class="cm"># 含「Delta」</span>
+
+<span class="cm"># iloc：用位置（從 0 起）</span>
+df.iloc[0]                      <span class="cm"># 第一列（Apex）</span>
+df.iloc[-1, 0]                  <span class="cm"># 最後一列、第一欄</span>
+df.iloc[1:3]                    <span class="cm"># 位置 1、2（不含 3）</span></div>
+        <div class="code-block mt-3" style="font-size:.92rem;">df.loc[["Apex", "Crown"], ["Close", "EPS"]]
+       Close  EPS
+Name             
+Apex     100    5
+Crown     30    2</div>
+      </div>
+      <div class="text-lg">
+        <table class="t mb-3">
+          <tr><th></th><th><code class="i">loc</code></th><th><code class="i">iloc</code></th></tr>
+          <tr><td>依據</td><td>index 的<b>名字</b>、欄名</td><td>第幾列、第幾欄（<b>位置</b>）</td></tr>
+          <tr><td>範圍</td><td><b>含</b>結尾</td><td><b>不含</b>結尾（和 list 切片一樣）</td></tr>
+          <tr><td>排序後</td><td>還是找到同一家公司</td><td>位置變了，<b>可能換成別家</b></td></tr>
+        </table>
+        <p class="bg-blue-50 border-l-4 border-blue-700 p-3 rounded">💡 要查「某一家公司」用 <code class="i">loc</code>；要「排名第一的那家」才用 <code class="i">iloc</code>（先排序再 <code class="i">iloc[0]</code>）。</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 7 預測輸出 3 -->
+<div class="slide-page">
+  <div class="content-card">
+    <div class="h-title">🔍 預測輸出 3：loc 與 iloc</div>
+    <p class="mb-3 text-lg">使用 mini_stocks 的 <code class="i">df</code>（Apex～Fleet 的 Close：100, 50, 30, 20, 60, 40）</p>
+    <div class="grid md:grid-cols-2 gap-4">
+      <div class="pq"><div class="pq-head">Q1</div>
+<div class="code-block">print(df.iloc[1:3]["Close"].tolist())</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">[50, 30]</span><br>位置 1、2（Bolt、Crown），不含位置 3。</div>
+      </div>
+      <div class="pq"><div class="pq-head">Q2</div>
+<div class="code-block">print(df.loc["Bolt":"Delta", "Close"].tolist())</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">[50, 30, 20]</span><br>loc 用名字取範圍，<b>包含</b>Delta。和 Q1 比一比！</div>
+      </div>
+      <div class="pq"><div class="pq-head">Q3</div>
+<div class="code-block">r = df.loc[["Apex", "Fleet"], "DivYield"]
+print(r.tolist())</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">[2.0, 6.0]</span><br>用 list 指定要哪幾家公司。</div>
+      </div>
+      <div class="pq"><div class="pq-head">Q4（排序後）</div>
+<div class="code-block">top = df.sort_values("DivYield",
+                    ascending=False)
+a = top.iloc[0]["Close"]
+b = top.loc["Apex", "Close"]
+print(a, b)</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">40 100</span><br>排序後位置 0 變成殖利率最高的 Fleet（40）；但 <code class="i">loc["Apex"]</code> 不管怎麼排都是 Apex。</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 8 index 對齊 -->
+<div class="slide-page">
+  <div class="content-card">
+    <div class="h-title">4. index 的威力：運算時「按名字配對」</div>
+    <div class="grid md:grid-cols-2 gap-6">
+      <div>
+        <div class="code-block" style="font-size:.92rem;">price = pd.Series([100, 50, 30],
+                  index=["Apex", "Bolt", "Crown"])
+<span class="cm"># 注意：eps 的順序不同！</span>
+eps   = pd.Series([2, 5, 10],
+                  index=["Crown", "Apex", "Bolt"])
+
+pe = price / eps
+print(pe["Apex"], pe["Bolt"], pe["Crown"])
+<span class="cm"># 20.0 5.0 15.0</span></div>
+        <p class="mt-3">pandas 會先<b>按名字配對</b>：Apex 的股價除以Apex的 EPS（100 / 5），而不是「第一個除以第一個」。</p>
+        <div class="code-block mt-3" style="font-size:.92rem;"><span class="cm"># 只取 values（像 list）→ 按位置配對</span>
+print((price.values / eps.values).tolist())
+<span class="cm"># [50.0, 10.0, 3.0]  ← 全錯！</span></div>
+      </div>
+      <div class="text-lg">
+        <p class="font-bold text-blue-900 mb-2">名字對不上會怎樣？</p>
+        <div class="code-block mb-3" style="font-size:.92rem;">bonus = pd.Series([1, 2], index=["Apex", "Delta"])
+r = price + bonus
+print(r["Apex"], r.isna().sum())
+<span class="cm"># 101.0 3</span></div>
+        <p class="mb-3">只有Apex兩邊都有；Bolt、Crown、Delta 只出現在一邊，結果是 <b>NaN（缺值）</b>。</p>
+        <p class="bg-red-50 border-l-4 border-red-600 p-3 rounded">這就是 index 的意義：<b>它是每一列的身分證</b>。資料來源不同、順序不同時，pandas 靠 index 把同一家公司的資料配在一起。</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 9 預測輸出 4 -->
+<div class="slide-page">
+  <div class="content-card">
+    <div class="h-title">🔍 預測輸出 4：按名字配對</div>
+    <p class="mb-3 text-lg"><code class="i">p = pd.Series([40, 60], index=["Fleet", "Echo"])</code>；<code class="i">e = pd.Series([-3, 4], index=["Echo", "Fleet"])</code></p>
+    <div class="grid md:grid-cols-2 gap-4">
+      <div class="pq"><div class="pq-head">Q1</div>
+<div class="code-block">pe = p / e
+print(pe["Fleet"], pe["Echo"])</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">10.0 -20.0</span><br>Fleet：40 / 4；Echo：60 / (−3)。EPS 是負的（虧損），本益比就變負數——這樣的本益比<b>沒有意義</b>（單元 4 會處理）。</div>
+      </div>
+      <div class="pq"><div class="pq-head">Q2</div>
+<div class="code-block">print((p.values / e.values).tolist())</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">[-13.333333333333334, 15.0]</span><br>40 / (−3)、60 / 4：按位置配對，<b>公司配錯了</b>。</div>
+      </div>
+      <div class="pq"><div class="pq-head">Q3</div>
+<div class="code-block">d = pd.Series([1.0, 2.0], index=["Fleet", "Apex"])
+print((p * d).isna().sum(), len(p * d))</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">2 3</span><br>名字聯集是 Echo、Fleet、Apex 3 個；只有Fleet兩邊都有，其餘 2 個是 NaN。</div>
+      </div>
+      <div class="pq"><div class="pq-head">Q4</div>
+<div class="code-block">print(df["Close"]["Echo"] / df["EPS"]["Echo"])</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">-20.0</span><br>回到 mini_stocks 的 df：Echo 的股價 60、EPS −3。</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 10 真實資料 -->
+<div class="slide-page">
+  <div class="content-card">
+    <div class="h-title">5. 真實資料：證交所 31 檔大型股（2026/09/30）</div>
+    <div class="grid md:grid-cols-5 gap-5">
+      <div class="md:col-span-2">
+        <div class="code-block" style="font-size:.88rem;">df = pd.read_csv(
+    DATA_URL + "tw_valuation.csv",
+    index_col="Ticker",
+    dtype={"Ticker": str})  <span class="cm"># 重要！</span>
+df.head()</div>
+        <table class="t mt-3" style="font-size:.88rem;">
+          <tr><th>欄位</th><th>意義</th></tr>
+          <tr><td>Close</td><td>收盤價（元）</td></tr>
+          <tr><td>DivYield</td><td>殖利率（<b>%</b>）</td></tr>
+          <tr><td>PE</td><td>本益比（倍）</td></tr>
+          <tr><td>PB</td><td>股價淨值比（倍）</td></tr>
+        </table>
+      </div>
+      <div class="md:col-span-3">
+        <div class="code-block" style="font-size:.85rem;">       Name Industry  Close  DivYield     PE    PB
+Ticker
+1101     台泥     水泥工業   26.3      3.04    NaN  0.85
+1216     統一     食品工業   74.2      4.04  17.92  3.09
+1301     台塑     塑膠工業   68.1      0.73  41.52  0.75
+1303     南亞     塑膠工業  255.5      0.31  41.21  4.24
+2002     中鋼     鋼鐵工業   19.2      0.78    NaN  0.98</div>
+        <div class="code-block mt-3" style="font-size:.88rem;">df.loc["2330", "PE"]          <span class="cm"># 28.75</span>
+df["DivYield"].idxmax()       <span class="cm"># '2603'（長榮）</span>
+df.loc[df["DivYield"].idxmax(), "Name"]   <span class="cm"># '長榮'</span></div>
+        <p class="mt-2 text-base">💡 台泥、中鋼的本益比是 NaN：最近四季<b>虧損</b>，本益比不適用，證交所顯示「-」。</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 10b 編碼 -->
+<div class="slide-page">
+  <div class="content-card">
+    <div class="h-title">📌 讀取中文資料：編碼（encoding）問題</div>
+    <div class="grid md:grid-cols-5 gap-6">
+      <div class="md:col-span-2 text-lg">
+        <p class="mb-3">從這裡開始用的是<b>證交所的真實資料</b>，公司名稱、產業別是中文。電腦存中文字有不同的「編碼」方式，最常見兩種：</p>
+        <table class="t mb-3">
+          <tr><th>編碼</th><th>誰在用</th></tr>
+          <tr><td><b>UTF-8</b></td><td>國際通用；Colab、pandas 的預設</td></tr>
+          <tr><td><b>Big5（cp950）</b></td><td>證交所、政府網站下載的 CSV；繁中 Windows 的 Excel 預設</td></tr>
+        </table>
+        <p class="bg-blue-50 border-l-4 border-blue-700 p-3 rounded">✅ <b>課程網站上的資料都已存成 UTF-8</b>，用 <code class="i">pd.read_csv(DATA_URL + "檔名")</code> 直接讀就好，不需要加 encoding。</p>
+      </div>
+      <div class="md:col-span-3">
+        <p class="font-bold text-blue-900 mb-2">以後自己下載資料時，卡住了先對照這張表</p>
+        <table class="t mb-3" style="font-size:.95rem;">
+          <tr><th>現象</th><th>解法</th></tr>
+          <tr><td>出現 <code class="i">UnicodeDecodeError</code><br>（訊息裡有 <code class="i">codec can't decode</code>）</td><td>檔案是 Big5，讀檔時加上<br><code class="i">encoding="cp950"</code></td></tr>
+          <tr><td>沒有報錯，但中文變成奇怪的符號</td><td>編碼猜錯了，換另一種 encoding 試試</td></tr>
+          <tr><td>用 Excel 打開自己存的 CSV，中文是亂碼</td><td>用 <code class="i">to_csv</code> 存檔時加上<br><code class="i">encoding="utf-8-sig"</code></td></tr>
+          <tr><td>印出 DataFrame 時中文欄位對不齊</td><td>只是顯示問題，可加：<br><code class="i">pd.set_option(<br>"display.unicode.east_asian_width",<br>True)</code></td></tr>
+        </table>
+        <div class="code-block mb-2" style="font-size:.88rem;"><span class="cm"># 自己下載的檔案</span>
+df = pd.read_csv("my_download.csv",
+                 encoding="cp950")</div>
+        <p class="text-base text-gray-600">💡 看到錯誤訊息裡有 <b>decode</b> 或 <b>codec</b> 這兩個字，幾乎都是編碼問題。</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 11 預測輸出 5 -->
+<div class="slide-page">
+  <div class="content-card">
+    <div class="h-title">🔍 預測輸出 5：真實資料</div>
+    <p class="mb-3 text-lg">使用上一頁的 <code class="i">df</code>（31 檔；台泥、中鋼的 PE 為 NaN；台積電 PE 28.75、殖利率 0.89%）</p>
+    <div class="grid md:grid-cols-2 gap-4">
+      <div class="pq"><div class="pq-head">Q1</div>
+<div class="code-block">print(df.shape, df["PE"].count())</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">(31, 6) 29</span><br>Ticker 是 index，剩 6 欄；<code class="i">count()</code> 不算 NaN，所以 31 − 2 = 29。</div>
+      </div>
+      <div class="pq"><div class="pq-head">Q2</div>
+<div class="code-block">print(df.iloc[0]["Name"], df.loc["2330", "Name"])</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">台泥 台積電</span><br>位置 0 是第一列（台泥）；loc 用代碼找台積電。</div>
+      </div>
+      <div class="pq"><div class="pq-head">Q3（買 1 張台積電，一年領多少股利？）</div>
+<div class="code-block">y = df.loc["2330", "DivYield"]   # 0.89
+p = df.loc["2330", "Close"]      # 2480.0
+print(p * 1000 * y)</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">2207200.0</span><br>算出約 220 萬元——<b>不合理！</b>殖利率 0.89 的單位是 %，要除以 100。正確約 22,072 元。</div>
+      </div>
+      <div class="pq"><div class="pq-head">Q4（會發生什麼事？）</div>
+<div class="code-block">w = pd.read_csv(DATA_URL + "tw_valuation.csv",
+                index_col="Ticker")   # 沒加 dtype
+print(w.loc["2330", "PE"])</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">KeyError: '2330'</span><br>代碼被讀成<b>整數</b> 2330，index 裡沒有<b>文字</b> "2330"。要寫 <code class="i">w.loc[2330]</code> 才找得到——但 0050 這種代碼就會變成 50。</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 12 AI 常犯錯誤 -->
+<div class="slide-page">
+  <div class="content-card">
+    <div class="h-title">⚠️ 本單元的「AI 常犯錯誤」專欄</div>
+    <p class="mb-4 text-lg">這些錯誤多半<b>不會報錯</b>，或報錯了 AI 就「換個寫法」繞過去：</p>
+    <div class="grid md:grid-cols-2 gap-4 text-lg">
+      <div class="warn"><b>① 股票代碼被讀成數字</b><br><code class="i">loc["2330"]</code> 找不到，AI 改成 <code class="i">loc[2330]</code> 就「解決」了，但 0050 會變成 50。<br>👉 讀檔時加 <code class="i">dtype={"Ticker": str}</code></div>
+      <div class="warn"><b>② 百分比單位</b><br>殖利率欄位 3.04 代表 3.04%，直接拿來乘金額會放大 100 倍。<br>👉 檢查：算出來的金額合理嗎？</div>
+      <div class="warn"><b>③ 丟掉 index 改用位置配對</b><br>用 <code class="i">.values</code> 或 list 運算，兩份資料順序不同就會配錯公司。<br>👉 盡量讓 pandas 用 index 配對</div>
+      <div class="warn"><b>④ 用 iloc 找「某家公司」</b><br>排序或篩選之後，<code class="i">iloc[0]</code> 就不是原來那家了。<br>👉 找特定公司用 <code class="i">loc</code></div>
+    </div>
+    <p class="mt-2 text-gray-600">🔁 期末考會從這個專欄出題。</p>
+  </div>
+</div>
+
+<!-- 13 綜合 -->
+<div class="slide-page">
+  <div class="content-card">
+    <div class="h-title">🧩 綜合練習：讀懂一段完整的程式</div>
+    <div class="grid md:grid-cols-5 gap-6">
+      <div class="md:col-span-3">
+        <div class="code-block" style="font-size:.9rem;">df = pd.read_csv(DATA_URL + "mini_stocks.csv",
+                 index_col="Name")
+top = df.sort_values("DivYield", ascending=False)
+
+print(top.index[0], top.iloc[0]["Close"])
+print(df.iloc[0]["Close"], top.loc["Apex", "DivYield"])
+print(df.loc["Crown":"Echo", "EPS"].sum())
+dps = df["Close"] * df["DivYield"] / 100   <span class="cm"># 每股股利</span>
+print(dps.round(1).tolist())</div>
+        <table class="t mt-3" style="font-size:.88rem;">
+          <tr><th>Name</th><th>Apex</th><th>Bolt</th><th>Crown</th><th>Delta</th><th>Echo</th><th>Fleet</th></tr>
+          <tr><td>Close</td><td>100</td><td>50</td><td>30</td><td>20</td><td>60</td><td>40</td></tr>
+          <tr><td>EPS</td><td>5</td><td>2</td><td>2</td><td>1</td><td>−3</td><td>4</td></tr>
+          <tr><td>DivYield (%)</td><td>2</td><td>3</td><td>5</td><td>4</td><td>0</td><td>6</td></tr>
+        </table>
+      </div>
+      <div class="md:col-span-2">
+        <div class="pq"><div class="pq-head">請寫出完整的 4 行輸出</div>
+          <input placeholder="第 1 行"><input placeholder="第 2 行"><input placeholder="第 3 行"><input placeholder="第 4 行">
+          <button onclick="reveal(this)">顯示答案</button>
+          <div class="ans"><span class="out">Fleet 40
+100 2.0
+0
+[2.0, 1.5, 1.5, 0.8, 0.0, 2.4]</span><br>① 殖利率最高是 Fleet<br>② df 沒排序，位置 0 仍是 Apex；top 用 loc 找 Apex<br>③ Crown、Delta、Echo：2 + 1 + (−3) = 0<br>④ 這次有除以 100，單位正確</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 14 AI 協作 -->
+<div class="slide-page">
+  <div class="content-card">
+    <div class="h-title">🤖 課堂活動：請 AI 寫，由你驗收</div>
+    <div class="grid md:grid-cols-2 gap-6 text-lg">
+      <div>
+        <p class="font-bold text-blue-900 mb-2">步驟 1：給 AI 的指令（範例）</p>
+        <div class="bg-gray-100 rounded p-4 mb-4">「我有 tw_valuation.csv，欄位是 Ticker, Name, Industry, Close, DivYield, PE, PB。請用 pandas 以 Ticker 為 index 讀入，列出<b>殖利率最高的 5 檔</b>（顯示名稱、殖利率、本益比），並算出<b>買 1 張台積電一年可領多少現金股利</b>。」</div>
+        <p class="font-bold text-blue-900 mb-2">步驟 2：執行前先想</p>
+        <p>台積電 2480 元、殖利率 0.89%，一張大概領多少？幾千、幾萬、還是幾百萬？</p>
+      </div>
+      <div>
+        <p class="font-bold text-blue-900 mb-2">步驟 3：驗收清單</p>
+        <ul class="space-y-2">
+          <li>☐ Ticker 有用文字讀入（<code class="i">loc["2330"]</code> 找得到）</li>
+          <li>☐ 殖利率有除以 100</li>
+          <li>☐ 1 張 = 1000 股</li>
+          <li>☐ 排序是由大到小（<code class="i">ascending=False</code>）</li>
+        </ul>
+        <div class="pq mt-4"><div class="pq-head">參考答案</div>
+          <button onclick="reveal(this)">顯示答案</button>
+          <div class="ans">殖利率前 5 名：長榮 6.68%、廣達 4.68%、長榮航 4.67%、華碩 4.37%、統一超 4.24%<br>1 張台積電：2480 × 1000 × 0.89% ≈ <b>22,072 元</b><br>（殖利率以過去一年股利計算，不代表未來）</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 15 課後練習 -->
+<div class="slide-page">
+  <div class="content-card">
+    <div class="h-title">📝 課後練習</div>
+    <div class="grid md:grid-cols-2 gap-6 text-lg">
+      <div>
+        <p class="font-bold text-blue-900 mb-2">A. 預測輸出（mini_stocks，index 為 Name）</p>
+        <div class="code-block" style="font-size:.88rem;"><span class="cm"># A1</span>
+a = df.loc["Echo"]["Industry"]
+b = df.iloc[2]["EPS"]
+print(a, b)
+<span class="cm"># A2</span>
+print(df["Close"].idxmin(), df["Close"].min())
+<span class="cm"># A3</span>
+print(df.loc[["Bolt", "Fleet"], "Close"].mean())
+<span class="cm"># A4</span>
+idx = ["Delta", "Crown", "Bolt"]
+s = pd.Series([1, 2, 3], index=idx)
+print((df["Close"] * s)["Crown"])</div>
+      </div>
+      <div>
+        <p class="font-bold text-blue-900 mb-2">B. 動手做（tw_valuation.csv）</p>
+        <ol class="list-decimal pl-6 space-y-2">
+          <li>找出<b>股價淨值比（PB）最高與最低</b>的公司名稱與數值。</li>
+          <li>用 <code class="i">loc</code> 一次取出 2330、2317、2454 三檔的 Close、PE、DivYield，並說明哪一檔的本益比最高。</li>
+        </ol>
+        <div class="pq mt-4"><div class="pq-head">A 部分答案</div>
+          <button onclick="reveal(this)">顯示答案</button>
+          <div class="ans"><span class="out">A1: Shipping 2
+A2: Delta 20
+A3: 45.0
+A4: 60.0</span><br>A4：按名字配對，Crown 的 Close 30 × s 的「Crown」2 = 60（不是位置）。Apex、Echo、Fleet 對不到而產生 NaN，所以整個結果變成 float。</div>
+        </div>
+      </div>
+    </div>
+    <p class="mt-4 text-center text-gray-500">下一單元（單元 4）：資料整理——選股篩選、新增欄位、分產業統計與缺值</p>
+  </div>
+</div>
+
+</div>
+
+<div class="nav">
+  <button id="prev" onclick="go(-1)">◀ 上一頁</button>
+  <span id="pg" class="font-semibold"></span>
+  <button id="next" onclick="go(1)">下一頁 ▶</button>
+</div>
+
+<script>
+  const pages = document.querySelectorAll('.slide-page');
+  let cur = 0;
+  function show(i){
+    pages[cur].classList.remove('active');
+    cur = Math.max(0, Math.min(pages.length - 1, i));
+    pages[cur].classList.add('active');
+    document.getElementById('pg').textContent = (cur + 1) + ' / ' + pages.length;
+    document.getElementById('prev').disabled = cur === 0;
+    document.getElementById('next').disabled = cur === pages.length - 1;
+  }
+  function go(d){ show(cur + d); }
+  function reveal(btn){
+    const a = btn.parentElement.querySelector('.ans');
+    a.classList.toggle('show');
+    btn.textContent = a.classList.contains('show') ? '隱藏答案' : '顯示答案';
+  }
+  document.addEventListener('keydown', e => {
+    if (e.target.tagName === 'INPUT') return;
+    if (e.key === 'ArrowRight' || e.key === 'PageDown') go(1);
+    if (e.key === 'ArrowLeft'  || e.key === 'PageUp')   go(-1);
+  });
+  show(0);
+</script>
+</body>
+</html>

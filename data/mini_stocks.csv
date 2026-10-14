@@ -1,0 +1,7 @@
+Name,Industry,Close,EPS,DivYield
+Apex,Tech,100,5,2.0
+Bolt,Tech,50,2,3.0
+Crown,Finance,30,2,5.0
+Delta,Finance,20,1,4.0
+Echo,Shipping,60,-3,0.0
+Fleet,Shipping,40,4,6.0

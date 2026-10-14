@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>單元 4 pandas 資料整理</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  html, body { margin:0; padding:0; height:100%; overflow:hidden; background:#f3f4f6; }
+  .slides-container { position:relative; width:100vw; height:100vh; overflow:hidden; }
+  .slide-page { position:absolute; inset:0; opacity:0; visibility:hidden; transition:opacity .35s ease; z-index:10;
+                display:flex; align-items:center; justify-content:center; padding:2rem 2rem 5rem; }
+  .slide-page.active { opacity:1; visibility:visible; z-index:20; }
+  .content-card { background:#fff; border-radius:1rem; box-shadow:0 10px 15px rgba(0,0,0,.1);
+                  width:100%; max-width:1100px; max-height:100%; overflow-y:auto; padding:2.25rem 2.75rem; }
+  .code-block { background:#1e1e1e; color:#d4d4d4; padding:1rem 1.25rem; border-radius:.5rem;
+                font-family:Consolas, "Courier New", monospace; font-size:1.05rem; line-height:1.6;
+                white-space:pre; overflow-x:auto; }
+  .cm { color:#6a9955; }
+  .h-title { font-size:1.8rem; font-weight:800; color:#1e3a8a; margin-bottom:.8rem; }
+  table.t { width:100%; border-collapse:collapse; font-size:1.05rem; }
+  table.t th { background:#1e3a8a; color:#fff; padding:.5rem .75rem; text-align:left; }
+  table.t td { border-bottom:1px solid #e5e7eb; padding:.5rem .75rem; vertical-align:top; }
+  code.i { background:#eef2ff; color:#3730a3; padding:0 .3rem; border-radius:.25rem; font-family:Consolas, monospace; }
+  /* 預測輸出卡片 */
+  .pq { border:2px solid #f59e0b; border-radius:.75rem; padding:1rem 1.25rem; margin-bottom:1rem; background:#fffbeb; }
+  .pq-head { font-weight:700; color:#b45309; margin-bottom:.5rem; }
+  .pq .code-block { font-size:.9rem; padding:.55rem .9rem; line-height:1.5; }
+  .pq { padding:.8rem 1.1rem; margin-bottom:.4rem; }
+  .pq input { width:100%; border:1px solid #d1d5db; border-radius:.4rem; padding:.25rem .6rem; margin-top:.45rem;
+              font-family:Consolas, monospace; font-size:1rem; background:#fff; }
+  .pq button { margin-top:.6rem; background:#b45309; color:#fff; padding:.35rem .9rem; border-radius:.4rem; font-size:.95rem; }
+  .pq button:hover { background:#92400e; }
+  .ans { display:none; margin-top:.6rem; background:#ecfdf5; border-left:4px solid #059669; padding:.6rem .9rem; border-radius:.3rem; }
+  .ans.show { display:block; }
+  .ans .out { font-family:Consolas, monospace; font-weight:700; color:#065f46; white-space:pre; }
+  .warn { border-left:6px solid #dc2626; background:#fef2f2; padding:.9rem 1.1rem; border-radius:.4rem; margin-bottom:.9rem; }
+  .nav { position:fixed; bottom:1rem; left:50%; transform:translateX(-50%); z-index:50; display:flex; gap:1rem; align-items:center;
+         background:rgba(255,255,255,.95); padding:.5rem 1rem; border-radius:999px; box-shadow:0 4px 10px rgba(0,0,0,.12); }
+  .nav button { background:#1e3a8a; color:#fff; padding:.35rem 1rem; border-radius:999px; }
+  .nav button:disabled { background:#9ca3af; }
+  .tag { display:inline-block; font-size:.8rem; font-weight:700; padding:.1rem .6rem; border-radius:999px; margin-right:.4rem; }
+</style>
+</head>
+<body class="font-sans text-gray-800">
+<div class="slides-container" id="slides">
+
+<!-- 0 封面 -->
+<div class="slide-page active">
+  <div class="content-card text-center" style="padding:4rem 3rem;">
+    <p class="text-lg text-gray-500 mb-2">R 與 Python Finance 計算｜115 學年度第 1 學期｜單元 4</p>
+    <h1 class="text-5xl font-extrabold text-blue-900 mb-4">pandas 資料整理</h1>
+    <p class="text-2xl text-gray-700 mb-8">選股篩選・新增欄位・分產業統計（groupby）・缺值與資料清理</p>
+    <div class="inline-block text-left bg-amber-50 border-2 border-amber-400 rounded-xl px-6 py-4">
+      <p class="font-bold text-amber-800 mb-1">🔍 本單元的預測輸出重點</p>
+      <p>篩選後<b>剩哪幾家</b>？分組後<b>每組的值</b>是多少？遇到缺值和負數，<b>結果還合理嗎</b>？</p>
+    </div>
+    <p class="mt-8 text-gray-500">← → 鍵或下方按鈕換頁</p>
+  </div>
+</div>
+
+<!-- 1 本單元問題 -->
+<div class="slide-page">
+  <div class="content-card">
+    <div class="h-title">本單元的財金問題</div>
+    <div class="bg-blue-900 text-white rounded-xl p-5 text-xl mb-6">
+      「用最簡單的價值選股：找出<b>本益比低於 15 倍、殖利率高於 4%</b> 的股票。另外，<b>各產業的平均本益比</b>是多少？證交所下載的原始檔有「-」和「2,480.00」，要怎麼整理才能分析？」
+    </div>
+    <div class="grid md:grid-cols-2 gap-6 text-lg">
+      <div>
+        <p class="font-bold text-blue-900 mb-2">本單元的工具</p>
+        <table class="t">
+          <tr><th>工具</th><th>解決什麼問題</th></tr>
+          <tr><td>布林篩選</td><td>選出符合條件的股票</td></tr>
+          <tr><td>新增欄位</td><td>自己算本益比、每股股利</td></tr>
+          <tr><td>groupby</td><td>分產業統計</td></tr>
+          <tr><td>缺值處理、資料清理</td><td>虧損公司沒有本益比、原始檔格式</td></tr>
+        </table>
+      </div>
+      <div>
+        <p class="font-bold text-blue-900 mb-2">本單元使用的資料</p>
+        <table class="t">
+          <tr><th>檔案</th><th>內容</th></tr>
+          <tr><td><code class="i">mini_stocks.csv</code></td><td>虛構 Apex～Fleet 6 家公司（可手算）</td></tr>
+          <tr><td><code class="i">tw_valuation.csv</code></td><td>31 檔大型股（已整理）</td></tr>
+          <tr><td><code class="i">tw_valuation_raw.csv</code></td><td>同一份資料的<b>證交所原始格式</b></td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 2 mini 參考 -->
+<div class="slide-page">
+  <div class="content-card">
+    <div class="h-title">📋 本單元預測輸出使用的資料：mini_stocks.csv</div>
+    <div class="grid md:grid-cols-5 gap-6">
+      <div class="md:col-span-3">
+        <div class="code-block" style="font-size:.74rem;"><span class="cm"># 課程資料放在網站上，不需上傳檔案</span>
+DATA_URL = "https://chadhsu226.github.io/python-finance/data/"
+df = pd.read_csv(DATA_URL + "mini_stocks.csv",
+                 index_col="Name")</div>
+        <table class="t mt-3">
+          <tr><th>Name（index）</th><th>Industry</th><th>Close</th><th>EPS</th><th>DivYield (%)</th></tr>
+          <tr><td>Apex</td><td>Tech</td><td>100</td><td>5</td><td>2.0</td></tr>
+          <tr><td>Bolt</td><td>Tech</td><td>50</td><td>2</td><td>3.0</td></tr>
+          <tr><td>Crown</td><td>Finance</td><td>30</td><td>2</td><td>5.0</td></tr>
+          <tr><td>Delta</td><td>Finance</td><td>20</td><td>1</td><td>4.0</td></tr>
+          <tr><td>Echo</td><td>Shipping</td><td>60</td><td><b>−3</b></td><td>0.0</td></tr>
+          <tr><td>Fleet</td><td>Shipping</td><td>40</td><td>4</td><td>6.0</td></tr>
+        </table>
+      </div>
+      <div class="md:col-span-2 text-lg">
+        <p class="mb-3"><b>做預測輸出時可以翻回這一頁。</b></p>
+        <table class="t mb-3">
+          <tr><th>名詞</th><th>公式</th></tr>
+          <tr><td>本益比 PE</td><td>股價 ÷ EPS</td></tr>
+          <tr><td>每股股利 DPS</td><td>股價 × 殖利率 ÷ 100</td></tr>
+        </table>
+        <p>⚠️ Echo 公司 EPS 是負的（<b>虧損</b>），請特別留意它在各題的表現。</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 3 布林篩選 -->
+<div class="slide-page">
+  <div class="content-card">
+    <div class="h-title">1. 布林篩選：選出符合條件的股票</div>
+    <div class="grid md:grid-cols-2 gap-6">
+      <div>
+        <p class="font-bold text-blue-900 mb-2">兩個步驟：先比較、再篩選</p>
+        <div class="code-block" style="font-size:.9rem;">cond = df["DivYield"] &gt; 4    <span class="cm"># 每家公司一個 True/False</span>
+high = df[cond]               <span class="cm"># 只留 True 的列</span>
+
+<span class="cm"># 通常寫成一行</span>
+high = df[df["DivYield"] &gt; 4]</div>
+        <p class="font-bold text-blue-900 mt-4 mb-2">多個條件：&amp;（且）、|（或）</p>
+        <div class="code-block" style="font-size:.9rem;">df[(df["Close"] &gt; 30) &amp; (df["EPS"] &gt; 0)]
+df[(df["Industry"] == "Finance") |
+   (df["DivYield"] &gt; 5)]
+df[df["Industry"].isin(["Tech", "Shipping"])]</div>
+      </div>
+      <div class="text-lg">
+        <p class="mb-3">💡 <code class="i">df["DivYield"] &gt; 4</code> 得到的也是一個 Series：<b>index 是公司名</b>，值是 True/False。篩選就是「按 index 留下 True 的公司」。</p>
+        <p class="bg-red-50 border-l-4 border-red-600 p-3 rounded mb-3"><b>和單元 1 不一樣！</b><br>• 要用 <code class="i">&amp;</code>、<code class="i">|</code>，<b>不能</b>用 <code class="i">and</code>、<code class="i">or</code><br>• 每個條件都要加<b>括號</b><br>寫錯會出現 <code class="i">ValueError</code>。</p>
+        <p class="bg-blue-50 border-l-4 border-blue-700 p-3 rounded">💡 True 當成 1、False 當成 0：<code class="i">(df["Industry"] == "Finance").sum()</code> 就是 Finance 產業的家數。</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 4 預測輸出 1 -->
+<div class="slide-page">
+  <div class="content-card">
+    <div class="h-title">🔍 預測輸出 1：篩選</div>
+    <p class="mb-3 text-lg">使用 mini_stocks 的 <code class="i">df</code>（資料見第 3 頁）</p>
+    <div class="grid md:grid-cols-2 gap-4">
+      <div class="pq"><div class="pq-head">Q1</div>
+<div class="code-block">hi = df[df["DivYield"] &gt;= 4]
+print(hi.index.tolist())</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">['Crown', 'Delta', 'Fleet']</span><br>殖利率 5、4、6；Delta 剛好等於 4，<code class="i">&gt;=</code> 有包含。</div>
+      </div>
+      <div class="pq"><div class="pq-head">Q2</div>
+<div class="code-block">c = (df["Close"] &gt; 30) &amp; (df["EPS"] &gt; 0)
+print(len(df[c]))</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">3</span><br>股價 &gt; 30：Apex、Bolt、Echo、Fleet；再排除 EPS 為負的 Echo → Apex、Bolt、Fleet。</div>
+      </div>
+      <div class="pq"><div class="pq-head">Q3</div>
+<div class="code-block">print((df["Industry"] == "Finance").sum())</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">2</span><br>Crown、Delta 兩家；True 加總 = 個數。</div>
+      </div>
+      <div class="pq"><div class="pq-head">Q4</div>
+<div class="code-block">c = df["Industry"].isin(["Tech", "Shipping"])
+print(df[c]["Close"].sum())</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">250</span><br>Apex 100 + Bolt 50 + Echo 60 + Fleet 40。</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 5 新增欄位 -->
+<div class="slide-page">
+  <div class="content-card">
+    <div class="h-title">2. 新增欄位：自己算本益比與每股股利</div>
+    <div class="grid md:grid-cols-2 gap-6">
+      <div>
+        <div class="code-block" style="font-size:.9rem;">df["PE"]  = df["Close"] / df["EPS"]
+df["DPS"] = df["Close"] * df["DivYield"] / 100
+
+<span class="cm"># 排序：由小到大、由大到小</span>
+df.sort_values("PE")
+df.sort_values("DivYield", ascending=False)</div>
+        <div class="code-block mt-3" style="font-size:.9rem;">       Industry  Close  EPS  DivYield    PE  DPS
+Name                                            
+Apex       Tech    100    5       2.0  20.0  2.0
+Bolt       Tech     50    2       3.0  25.0  1.5
+Crown   Finance     30    2       5.0  15.0  1.5
+Delta   Finance     20    1       4.0  20.0  0.8
+Echo   Shipping     60   -3       0.0 -20.0  0.0
+Fleet  Shipping     40    4       6.0  10.0  2.4</div>
+      </div>
+      <div class="text-lg">
+        <p class="mb-3">💡 <b>向量化運算</b>：pandas 按 index 把每家公司的股價和 EPS 配對相除，一行就算完全部公司（回想單元 3 的「按名字配對」），不必像單元 2 寫 for 迴圈。</p>
+        <p class="mb-3">💡 <code class="i">df["新欄名"] = ...</code>：欄名不存在就新增、已存在就覆蓋——和 dict 一樣。</p>
+        <p class="bg-red-50 border-l-4 border-red-600 p-3 rounded"><b>注意Echo公司：本益比 −20 倍。</b><br>EPS 為負代表虧損，負的本益比<b>沒有「便宜」的意思</b>，證交所直接顯示「-」。但程式不會知道，照樣算出 −20。</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 6 預測輸出 2 -->
+<div class="slide-page">
+  <div class="content-card">
+    <div class="h-title">🔍 預測輸出 2：本益比篩選的陷阱</div>
+    <p class="mb-3 text-lg">已執行 <code class="i">df["PE"] = df["Close"] / df["EPS"]</code></p>
+    <div class="grid md:grid-cols-2 gap-4">
+      <div class="pq"><div class="pq-head">Q1</div>
+<div class="code-block">print(df["PE"].tolist())</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">[20.0, 25.0, 15.0, 20.0, -20.0, 10.0]</span><br>除法結果是 float。</div>
+      </div>
+      <div class="pq"><div class="pq-head">Q2（選出「便宜」的股票？）</div>
+<div class="code-block">print(df[df["PE"] &lt; 15].index.tolist())</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">['Echo', 'Fleet']</span><br><b>虧損的Echo被選進來了！</b>−20 &lt; 15 成立。Crown 的 15 不算（&lt; 不含等於）。</div>
+      </div>
+      <div class="pq"><div class="pq-head">Q3（修正後）</div>
+<div class="code-block">c = (df["PE"] &gt; 0) &amp; (df["PE"] &lt; 15)
+print(df[c].index.tolist())</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">['Fleet']</span><br>先排除負本益比，再篩選。</div>
+      </div>
+      <div class="pq"><div class="pq-head">Q4</div>
+<div class="code-block">print(df["PE"].idxmin(), df["DPS"].idxmax())</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">Echo Fleet</span><br>「本益比最低」的竟然是虧損的 Echo；每股股利最高是 Fleet（2.4 元）。</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 7 groupby -->
+<div class="slide-page">
+  <div class="content-card">
+    <div class="h-title">3. groupby：分產業統計</div>
+    <div class="grid md:grid-cols-2 gap-6">
+      <div>
+        <div class="code-block" style="font-size:.9rem;">df.groupby("Industry")["Close"].mean()</div>
+        <div class="code-block mt-2" style="font-size:.9rem;">Industry
+Finance     25.0
+Shipping    50.0
+Tech        75.0
+Name: Close, dtype: float64</div>
+        <p class="font-bold text-blue-900 mt-4 mb-2">一次算好幾個統計量</p>
+        <div class="code-block" style="font-size:.9rem;">g = df.groupby("Industry")["DivYield"]
+g.agg(["count", "mean", "max"])</div>
+        <div class="code-block mt-2" style="font-size:.9rem;">          count  mean  max
+Industry                  
+Finance       2   4.5  5.0
+Shipping      2   3.0  6.0
+Tech          2   2.5  3.0</div>
+      </div>
+      <div class="text-lg">
+        <p class="font-bold text-blue-900 mb-2">讀法：分組 → 選欄 → 計算</p>
+        <table class="t mb-3">
+          <tr><th>片段</th><th>意思</th></tr>
+          <tr><td><code class="i">df.groupby("Industry")</code></td><td>依產業把公司<b>分成幾組</b></td></tr>
+          <tr><td><code class="i">["Close"]</code></td><td>每組只看 Close</td></tr>
+          <tr><td><code class="i">.mean()</code></td><td>每組各算一次平均</td></tr>
+        </table>
+        <p class="bg-red-50 border-l-4 border-red-600 p-3 rounded mb-3"><b>結果的 index 變了！</b>原本 index 是公司名，groupby 之後的 index 是<b>產業名</b>。所以要用 <code class="i">g["Finance"]</code> 取值，而不是 <code class="i">g["Crown"]</code>。</p>
+        <p>💡 <code class="i">df["Industry"].value_counts()</code>：快速看每個產業有幾家。</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 8 預測輸出 3 -->
+<div class="slide-page">
+  <div class="content-card">
+    <div class="h-title">🔍 預測輸出 3：groupby</div>
+    <p class="mb-3 text-lg">使用 mini_stocks 的 <code class="i">df</code>（資料見第 3 頁）</p>
+    <div class="grid md:grid-cols-2 gap-4">
+      <div class="pq"><div class="pq-head">Q1</div>
+<div class="code-block">g = df.groupby("Industry")["Close"].mean()
+print(g["Finance"], g["Tech"])</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">25.0 75.0</span><br>Finance：(30 + 20) / 2；Tech：(100 + 50) / 2。</div>
+      </div>
+      <div class="pq"><div class="pq-head">Q2</div>
+<div class="code-block">e = df.groupby("Industry")["EPS"].sum()
+print(e["Shipping"])</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">1</span><br>Echo −3 + Fleet 4 = 1。</div>
+      </div>
+      <div class="pq"><div class="pq-head">Q3</div>
+<div class="code-block">m = df.groupby("Industry")["DivYield"].max()
+print(m.idxmax(), m.max())</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">Shipping 6.0</span><br>m 的 index 是<b>產業</b>，所以 idxmax 回傳產業名，不是公司名「Fleet」。</div>
+      </div>
+      <div class="pq"><div class="pq-head">Q4</div>
+<div class="code-block">n = df["Industry"].value_counts()
+print(len(n), n["Tech"])</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">3 2</span><br>3 個產業，每個各 2 家。</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 9 真實資料 groupby -->
+<div class="slide-page">
+  <div class="content-card">
+    <div class="h-title">4. 真實資料：各產業的本益比與殖利率</div>
+    <div class="grid md:grid-cols-2 gap-6">
+      <div>
+        <div class="code-block" style="font-size:.86rem;">df = pd.read_csv(DATA_URL + "tw_valuation.csv",
+                 index_col="Ticker",
+                 dtype={"Ticker": str})
+t = df.groupby("Industry").agg(
+        n=("Name", "count"),
+        pe_mean=("PE", "mean"),
+        pe_median=("PE", "median"),
+        yld=("DivYield", "mean"))
+t.sort_values("n", ascending=False).head(6)</div>
+        <div class="code-block mt-2" style="font-size:.86rem;">          n  pe_mean  pe_median   yld
+Industry
+半導體業      5    42.33      28.75  1.58
+金融保險業     5    16.26      16.36  3.26
+電腦及週邊設備業  4    15.52      14.59  4.04
+航運業       3    10.63       9.50  4.91
+通信網路業     3    25.32      25.18  3.76
+光電業       2    96.12      96.12  1.20</div>
+      </div>
+      <div class="text-lg">
+        <p class="font-bold text-blue-900 mb-2">從結果讀出財金意義</p>
+        <ol class="list-decimal pl-6 space-y-3">
+          <li><b>半導體業平均 42 倍、中位數 29 倍，為什麼差這麼多？</b><br>聯發科 81 倍把平均拉高了。有極端值時，<b>中位數</b>比平均數更能代表「一般水準」。</li>
+          <li><b>光電業 96 倍？</b>只有 2 家，其中友達本益比 160 倍（獲利很低）。家數太少，平均沒有代表性。</li>
+          <li><b>航運業本益比最低、殖利率最高</b>——但這是不是「便宜」，還要看獲利能不能持續。數字只是分析的起點。</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 10 缺值 -->
+<div class="slide-page">
+  <div class="content-card">
+    <div class="h-title">5. 缺值 NaN：虧損公司「沒有」本益比</div>
+    <div class="grid md:grid-cols-2 gap-6">
+      <div>
+        <div class="code-block" style="font-size:.9rem;">pe = df["PE"]           <span class="cm"># tw_valuation 的本益比</span>
+pe.isna().sum()          <span class="cm"># 2（台泥、中鋼）</span>
+pe.count(), len(pe)      <span class="cm"># 29, 31</span>
+pe.mean()                <span class="cm"># 自動略過 NaN</span>
+pe.dropna()              <span class="cm"># 刪掉 NaN</span>
+pe.fillna(0)             <span class="cm"># 用 0 補 ← 危險！</span></div>
+        <div class="code-block mt-3" style="font-size:.9rem;">df["PE"].fillna(0).sort_values().head(3)
+<span class="cm"># 1101  0.00  ← 台泥（虧損）</span>
+<span class="cm"># 2002  0.00  ← 中鋼（虧損）</span>
+<span class="cm"># 2618  9.02  ← 長榮航</span></div>
+      </div>
+      <div class="text-lg">
+        <p class="font-bold text-blue-900 mb-2">NaN 在這裡有意義：「不適用」</p>
+        <table class="t mb-3">
+          <tr><th>處理方式</th><th>結果</th></tr>
+          <tr><td><code class="i">fillna(0)</code></td><td>❌ 虧損公司變成<b>本益比 0 倍、全市場最便宜</b></td></tr>
+          <tr><td>保留 NaN</td><td>⭕ 平均自動略過；<code class="i">NaN &lt; 15</code> 是 False，篩選時自動排除</td></tr>
+          <tr><td><code class="i">dropna()</code></td><td>⭕ 明確排除，但要說明排除了誰</td></tr>
+        </table>
+        <p class="bg-red-50 border-l-4 border-red-600 p-3 rounded">AI 常常「為了讓程式能跑」寫 <code class="i">fillna(0)</code>。程式不會報錯，但選股結果完全錯誤。<b>補值前先問：這個缺值代表什麼？</b></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 11 預測輸出 4 -->
+<div class="slide-page">
+  <div class="content-card">
+    <div class="h-title">🔍 預測輸出 4：缺值</div>
+    <p class="mb-3 text-lg">各題使用本益比：<code class="i">s = pd.Series([20, None, 10], index=["Apex", "Bolt", "Crown"])</code>（Bolt 公司虧損）</p>
+    <div class="grid md:grid-cols-2 gap-4">
+      <div class="pq"><div class="pq-head">Q1</div>
+<div class="code-block">print(s.count(), s.mean())</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">2 15.0</span><br>略過 NaN：(20 + 10) / <b>2</b>。</div>
+      </div>
+      <div class="pq"><div class="pq-head">Q2</div>
+<div class="code-block">print(s.fillna(0).idxmin())</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">Bolt</span><br>補 0 之後，虧損的Bolt變成「本益比最低」。</div>
+      </div>
+      <div class="pq"><div class="pq-head">Q3</div>
+<div class="code-block">print((s &lt; 15).tolist())</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">[False, False, True]</span><br>NaN 和任何數字比較都是 False，所以篩選時會自動被排除。</div>
+      </div>
+      <div class="pq"><div class="pq-head">Q4</div>
+<div class="code-block">print(s.dropna().index.tolist(), len(s))</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">['Apex', 'Crown'] 3</span><br><code class="i">dropna()</code> 回傳新的 Series，原本的 s 沒有被改變。</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 12 清理一 -->
+<div class="slide-page">
+  <div class="content-card">
+    <div class="h-title">6. 資料清理實戰（一）：證交所原始檔的健康檢查</div>
+    <div class="grid md:grid-cols-2 gap-6">
+      <div>
+        <div class="code-block" style="font-size:.88rem;">raw = pd.read_csv(DATA_URL + "tw_valuation_raw.csv")
+print(raw.shape)      <span class="cm"># (31, 9)</span>
+print(raw.dtypes)</div>
+        <div class="code-block mt-2" style="font-size:.86rem;">證券代號       int64    ← 代碼變數字
+證券名稱      object
+產業別       object
+收盤價       object    ← 數字欄卻是 object
+殖利率(%)   float64
+股利年度       int64
+本益比       object    ← 數字欄卻是 object
+股價淨值比   float64
+財報年/季     object</div>
+      </div>
+      <div class="text-lg">
+        <p class="font-bold text-blue-900 mb-2">打開檔案看原因</p>
+        <div class="code-block mb-3" style="font-size:.82rem;">證券代號,證券名稱,產業別,收盤價,殖利率(%),...,本益比,...
+1101,台泥,水泥工業,26.30,3.04,114,-,0.85,115/2
+2330,台積電,半導體業,"2,480.00",0.89,114,28.75,...</div>
+        <ol class="list-decimal pl-6 space-y-1">
+          <li>欄名是中文，寫程式不方便</li>
+          <li>證券代號被讀成<b>整數</b></li>
+          <li>收盤價有<b>千分位逗號</b>（2,480.00），整欄變成文字</li>
+          <li>本益比有「<b>-</b>」（虧損），整欄變成文字</li>
+          <li>殖利率的單位是 %</li>
+        </ol>
+        <p class="mt-3 bg-blue-50 border-l-4 border-blue-700 p-3 rounded">💡 健康檢查：<b>shape、dtypes、head</b>。<b>數字欄卻顯示 object，代表裡面混了文字。</b></p>
+        <p class="mt-2 text-base text-gray-600">📌 這份檔案已存成 UTF-8。如果是你<b>自己從證交所網站下載</b>的 CSV，讀檔時出現 <code class="i">UnicodeDecodeError</code>，請加上 <code class="i">encoding="cp950"</code>（見單元 3 的編碼說明）。</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 13 清理二 -->
+<div class="slide-page">
+  <div class="content-card">
+    <div class="h-title">6. 資料清理實戰（二）：兩種整理方法</div>
+    <div class="grid md:grid-cols-2 gap-6">
+      <div>
+        <p class="font-bold text-blue-900 mb-2">方法 A：讀檔時就處理好</p>
+        <div class="code-block" style="font-size:.86rem;">raw = pd.read_csv(DATA_URL + "tw_valuation_raw.csv",
+        dtype={"證券代號": str},  <span class="cm"># 代碼保持文字</span>
+        thousands=",",            <span class="cm"># 去掉千分位</span>
+        na_values=["-"])          <span class="cm"># 「-」視為缺值</span>
+df = raw.rename(columns={
+        "證券代號": "Ticker", "證券名稱": "Name",
+        "產業別": "Industry", "收盤價": "Close",
+        "殖利率(%)": "DivYield", "本益比": "PE"})
+df = df.set_index("Ticker")</div>
+      </div>
+      <div>
+        <p class="font-bold text-blue-900 mb-2">方法 B：讀進來之後再轉換</p>
+        <div class="code-block" style="font-size:.86rem;">c = raw["收盤價"].str.replace(",", "")
+raw["收盤價"] = pd.to_numeric(c)
+raw["本益比"] = pd.to_numeric(raw["本益比"],
+                              errors="coerce")</div>
+        <table class="t mt-3" style="font-size:.95rem;">
+          <tr><th>函式</th><th>作用</th></tr>
+          <tr><td><code class="i">.str.replace(",", "")</code></td><td>把文字裡的逗號拿掉</td></tr>
+          <tr><td><code class="i">pd.to_numeric(...)</code></td><td>文字 → 數字</td></tr>
+          <tr><td><code class="i">errors="coerce"</code></td><td>轉不了的（「-」）變 NaN</td></tr>
+          <tr><td><code class="i">rename(columns={舊: 新})</code></td><td>改欄名（用 dict）</td></tr>
+          <tr><td><code class="i">set_index("Ticker")</code></td><td>把某一欄設為 index</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 14 預測輸出 5 -->
+<div class="slide-page">
+  <div class="content-card">
+    <div class="h-title">🔍 預測輸出 5：資料清理</div>
+    <div class="grid md:grid-cols-2 gap-4">
+      <div class="pq"><div class="pq-head">Q1（陷阱）</div>
+<div class="code-block">v = pd.Series(["1,000", "2,500"])
+print(v.sum())</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">1,0002,500</span><br>是<b>文字</b>，sum 變成「串接」——和單元 1 的 <code class="i">"50" + "20"</code> 一樣！</div>
+      </div>
+      <div class="pq"><div class="pq-head">Q2</div>
+<div class="code-block">x = pd.Series(["17.92", "-", "41.52"])
+y = pd.to_numeric(x, errors="coerce")
+print(y.tolist(), y.mean())</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">[17.92, nan, 41.52] 29.720000000000002</span><br>「-」變成 NaN；平均略過 NaN：(17.92 + 41.52) / 2 = 29.72，又出現浮點數誤差。</div>
+      </div>
+      <div class="pq"><div class="pq-head">Q3</div>
+<div class="code-block">c = pd.Series(["2,480.00", "26.30"])
+print(pd.to_numeric(c.str.replace(",", "")).max())</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">2480.0</span><br>去掉逗號再轉數字。</div>
+      </div>
+      <div class="pq"><div class="pq-head">Q4</div>
+<div class="code-block">raw = pd.read_csv(
+    DATA_URL + "tw_valuation_raw.csv")
+print(raw["證券代號"].iloc[0] + 1)</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">1102</span><br>第一列是台泥 1101；代碼被讀成整數，所以可以「加 1」——代碼不該能做加法！</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 15 AI 常犯錯誤 -->
+<div class="slide-page">
+  <div class="content-card">
+    <div class="h-title">⚠️ 本單元的「AI 常犯錯誤」專欄</div>
+    <p class="mb-4 text-lg">選股與資料整理的錯誤，程式都能跑，只是<b>選出錯的股票</b>：</p>
+    <div class="grid md:grid-cols-2 gap-4 text-lg">
+      <div class="warn"><b>① 負本益比被當成便宜</b><br><code class="i">PE &lt; 15</code> 會把虧損公司（負本益比）一起選進來。<br>👉 加上 <code class="i">PE &gt; 0</code>，或讓虧損公司的 PE 保持 NaN</div>
+      <div class="warn"><b>② 用 0 補本益比缺值</b><br><code class="i">fillna(0)</code> 讓虧損公司變成「全市場最便宜」。<br>👉 先問：這個缺值代表什麼？</div>
+      <div class="warn"><b>③ 平均數被極端值拉走</b><br>產業平均本益比被一兩家極端值主導（友達 160 倍）。<br>👉 同時看中位數、家數</div>
+      <div class="warn"><b>④ 數字被當成文字</b><br>千分位逗號、「-」讓整欄變 object，sum 變成串接、排序變成字典順序。<br>👉 檢查：<code class="i">df.dtypes</code></div>
+    </div>
+    <p class="mt-2 text-gray-600">🔁 期末考會從這個專欄出題。</p>
+  </div>
+</div>
+
+<!-- 16 綜合 -->
+<div class="slide-page">
+  <div class="content-card">
+    <div class="h-title">🧩 綜合練習：從原始檔到選股結果</div>
+    <div class="grid md:grid-cols-5 gap-6">
+      <div class="md:col-span-3">
+        <div class="code-block" style="font-size:.84rem;">raw = pd.read_csv(DATA_URL + "tw_valuation_raw.csv",
+                  dtype={"證券代號": str},
+                  thousands=",", na_values=["-"])
+df = raw.rename(columns={"證券代號": "Ticker",
+        "證券名稱": "Name", "產業別": "Industry",
+        "收盤價": "Close", "殖利率(%)": "DivYield",
+        "本益比": "PE"}).set_index("Ticker")
+
+print(df.loc["2330", "Close"])
+print(df["PE"].isna().sum(), df.shape)
+pick = df[(df["PE"] &lt; 15) &amp; (df["DivYield"] &gt; 4)]
+print(pick["Name"].tolist())
+print(df.groupby("Industry")["PE"].count()["水泥工業"])</div>
+        <p class="mt-2 text-base text-gray-600">提示：原始檔 31 列 × 9 欄；台泥（水泥工業唯一一家）、中鋼的本益比是「-」。本益比 &lt; 15 且殖利率 &gt; 4% 的有：華碩（14.05, 4.37）、廣達（14.53, 4.68）、長榮（9.50, 6.68）、長榮航（9.02, 4.67）。</p>
+      </div>
+      <div class="md:col-span-2">
+        <div class="pq"><div class="pq-head">請寫出完整的 4 行輸出</div>
+          <input placeholder="第 1 行"><input placeholder="第 2 行"><input placeholder="第 3 行"><input placeholder="第 4 行">
+          <button onclick="reveal(this)">顯示答案</button>
+          <div class="ans"><span class="out">2480.0
+2 (31, 8)
+['華碩', '廣達', '長榮', '長榮航']
+0</span><br>① 逗號去掉後是數字<br>② 證券代號變成 index，剩 8 欄<br>③ 依原始順序（代碼由小到大）<br>④ <code class="i">count()</code> 不算 NaN；台泥的 PE 是 NaN，所以水泥工業是 0</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 17 AI 協作 -->
+<div class="slide-page">
+  <div class="content-card">
+    <div class="h-title">🤖 課堂活動：請 AI 選股，由你驗收</div>
+    <div class="grid md:grid-cols-2 gap-6 text-lg">
+      <div>
+        <p class="font-bold text-blue-900 mb-2">步驟 1：給 AI 的指令（範例）</p>
+        <div class="bg-gray-100 rounded p-4 mb-4">「我有證交所下載的 tw_valuation_raw.csv（先貼前幾列給 AI 看）。請用 pandas 整理後，選出<b>本益比低於 15 倍、殖利率高於 4%</b> 的股票，並計算<b>各產業的平均本益比</b>。」</div>
+        <p class="font-bold text-blue-900 mb-2">步驟 2：驗收清單</p>
+        <ul class="space-y-1">
+          <li>☐ 收盤價、本益比有轉成數字（看 dtypes）</li>
+          <li>☐ 「-」怎麼處理？<b>有沒有補成 0？</b></li>
+          <li>☐ 選股結果有沒有虧損公司？</li>
+          <li>☐ 產業平均有沒有同時列出家數？</li>
+          <li>☐ 代碼是不是文字（0050 這類代碼才不會出錯）</li>
+        </ul>
+      </div>
+      <div>
+        <p class="font-bold text-blue-900 mb-2">步驟 3：和參考答案比對</p>
+        <div class="pq"><div class="pq-head">參考答案</div>
+          <button onclick="reveal(this)">顯示答案</button>
+          <div class="ans">• 正確選股結果：<b>華碩、廣達、長榮、長榮航</b>（4 檔）<br>• 這次殖利率條件剛好擋掉了台泥（3.04%）、中鋼（0.78%）。但如果<b>只篩本益比 &lt; 15</b>：正確是 9 檔；AI 若把「-」補成 0，會變成 11 檔，<b>多出台泥、中鋼兩家虧損公司</b><br>• 全體本益比：平均 28.3 倍、中位數 18.8 倍<br>👉 結論：<b>條件不同、缺值處理不同，答案就不同</b>，要看懂 AI 做了什麼。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 18 課後練習 -->
+<div class="slide-page">
+  <div class="content-card">
+    <div class="h-title">📝 課後練習</div>
+    <div class="grid md:grid-cols-2 gap-6 text-lg">
+      <div>
+        <p class="font-bold text-blue-900 mb-2">A. 預測輸出（mini_stocks，已新增 PE 欄）</p>
+        <div class="code-block" style="font-size:.86rem;"><span class="cm"># A1</span>
+c = (df["Industry"] == "Finance") | (df["EPS"] &lt; 0)
+print(df[c].index.tolist())
+<span class="cm"># A2</span>
+print(df.groupby("Industry")["PE"].min()["Shipping"])
+<span class="cm"># A3</span>
+top = df.sort_values("DivYield", ascending=False)
+print(top.head(2)["Close"].sum())
+<span class="cm"># A4</span>
+s = pd.Series([12.5, None, 8.0])
+print(s.fillna(s.mean()).tolist())</div>
+      </div>
+      <div>
+        <p class="font-bold text-blue-900 mb-2">B. 動手做（tw_valuation.csv）</p>
+        <ol class="list-decimal pl-6 space-y-2">
+          <li>以<b>股價淨值比 &lt; 1.5 且殖利率 &gt; 3%</b> 選股，列出名稱與產業。</li>
+          <li>用 groupby 算出各產業的<b>中位數本益比</b>與<b>家數</b>，只顯示家數 ≥ 2 的產業。</li>
+        </ol>
+        <div class="pq mt-4"><div class="pq-head">A 部分答案</div>
+          <button onclick="reveal(this)">顯示答案</button>
+          <div class="ans"><span class="out">A1: ['Crown', 'Delta', 'Echo']
+A2: -20.0
+A3: 70
+A4: [12.5, 10.25, 8.0]</span><br>A2：Shipping 組的最小值是Echo的 −20（又是負本益比）<br>A3：殖利率最高兩家是 Fleet 40、Crown 30<br>A4：用平均數補值（12.5 + 8）/ 2——想一想：這樣補合理嗎？</div>
+        </div>
+      </div>
+    </div>
+    <p class="mt-4 text-center text-gray-500">下一單元（單元 5）：時間序列與報酬率——日期 index、shift、pct_change、還原價</p>
+  </div>
+</div>
+
+</div>
+
+<div class="nav">
+  <button id="prev" onclick="go(-1)">◀ 上一頁</button>
+  <span id="pg" class="font-semibold"></span>
+  <button id="next" onclick="go(1)">下一頁 ▶</button>
+</div>
+
+<script>
+  const pages = document.querySelectorAll('.slide-page');
+  let cur = 0;
+  function show(i){
+    pages[cur].classList.remove('active');
+    cur = Math.max(0, Math.min(pages.length - 1, i));
+    pages[cur].classList.add('active');
+    document.getElementById('pg').textContent = (cur + 1) + ' / ' + pages.length;
+    document.getElementById('prev').disabled = cur === 0;
+    document.getElementById('next').disabled = cur === pages.length - 1;
+  }
+  function go(d){ show(cur + d); }
+  function reveal(btn){
+    const a = btn.parentElement.querySelector('.ans');
+    a.classList.toggle('show');
+    btn.textContent = a.classList.contains('show') ? '隱藏答案' : '顯示答案';
+  }
+  document.addEventListener('keydown', e => {
+    if (e.target.tagName === 'INPUT') return;
+    if (e.key === 'ArrowRight' || e.key === 'PageDown') go(1);
+    if (e.key === 'ArrowLeft'  || e.key === 'PageUp')   go(-1);
+  });
+  show(0);
+</script>
+</body>
+</html>

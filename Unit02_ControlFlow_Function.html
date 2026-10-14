@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>單元 2 流程控制與函式</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  html, body { margin:0; padding:0; height:100%; overflow:hidden; background:#f3f4f6; }
+  .slides-container { position:relative; width:100vw; height:100vh; overflow:hidden; }
+  .slide-page { position:absolute; inset:0; opacity:0; visibility:hidden; transition:opacity .35s ease; z-index:10;
+                display:flex; align-items:center; justify-content:center; padding:2rem 2rem 5rem; }
+  .slide-page.active { opacity:1; visibility:visible; z-index:20; }
+  .content-card { background:#fff; border-radius:1rem; box-shadow:0 10px 15px rgba(0,0,0,.1);
+                  width:100%; max-width:1100px; max-height:100%; overflow-y:auto; padding:2.25rem 2.75rem; }
+  .code-block { background:#1e1e1e; color:#d4d4d4; padding:1rem 1.25rem; border-radius:.5rem;
+                font-family:Consolas, "Courier New", monospace; font-size:1.05rem; line-height:1.6;
+                white-space:pre; overflow-x:auto; }
+  .cm { color:#6a9955; }
+  .h-title { font-size:1.8rem; font-weight:800; color:#1e3a8a; margin-bottom:.8rem; }
+  table.t { width:100%; border-collapse:collapse; font-size:1.05rem; }
+  table.t th { background:#1e3a8a; color:#fff; padding:.5rem .75rem; text-align:left; }
+  table.t td { border-bottom:1px solid #e5e7eb; padding:.5rem .75rem; vertical-align:top; }
+  code.i { background:#eef2ff; color:#3730a3; padding:0 .3rem; border-radius:.25rem; font-family:Consolas, monospace; }
+  /* 預測輸出卡片 */
+  .pq { border:2px solid #f59e0b; border-radius:.75rem; padding:1rem 1.25rem; margin-bottom:1rem; background:#fffbeb; }
+  .pq-head { font-weight:700; color:#b45309; margin-bottom:.5rem; }
+  .pq .code-block { font-size:.9rem; padding:.55rem .9rem; line-height:1.5; }
+  .pq { padding:.8rem 1.1rem; margin-bottom:.4rem; }
+  .pq input { width:100%; border:1px solid #d1d5db; border-radius:.4rem; padding:.25rem .6rem; margin-top:.45rem;
+              font-family:Consolas, monospace; font-size:1rem; background:#fff; }
+  .pq button { margin-top:.6rem; background:#b45309; color:#fff; padding:.35rem .9rem; border-radius:.4rem; font-size:.95rem; }
+  .pq button:hover { background:#92400e; }
+  .ans { display:none; margin-top:.6rem; background:#ecfdf5; border-left:4px solid #059669; padding:.6rem .9rem; border-radius:.3rem; }
+  .ans.show { display:block; }
+  .ans .out { font-family:Consolas, monospace; font-weight:700; color:#065f46; white-space:pre; }
+  .warn { border-left:6px solid #dc2626; background:#fef2f2; padding:.9rem 1.1rem; border-radius:.4rem; margin-bottom:.9rem; }
+  .nav { position:fixed; bottom:1rem; left:50%; transform:translateX(-50%); z-index:50; display:flex; gap:1rem; align-items:center;
+         background:rgba(255,255,255,.95); padding:.5rem 1rem; border-radius:999px; box-shadow:0 4px 10px rgba(0,0,0,.12); }
+  .nav button { background:#1e3a8a; color:#fff; padding:.35rem 1rem; border-radius:999px; }
+  .nav button:disabled { background:#9ca3af; }
+  .tag { display:inline-block; font-size:.8rem; font-weight:700; padding:.1rem .6rem; border-radius:999px; margin-right:.4rem; }
+</style>
+</head>
+<body class="font-sans text-gray-800">
+<div class="slides-container" id="slides">
+
+<!-- 0 封面 -->
+<div class="slide-page active">
+  <div class="content-card text-center" style="padding:4rem 3rem;">
+    <p class="text-lg text-gray-500 mb-2">R 與 Python 金融計算｜115 學年度第 1 學期｜單元 2</p>
+    <h1 class="text-5xl font-extrabold text-blue-900 mb-4">流程控制與函式</h1>
+    <p class="text-2xl text-gray-700 mb-8">if 條件判斷・for / while 迴圈・def 自訂函式</p>
+    <div class="inline-block text-left bg-amber-50 border-2 border-amber-400 rounded-xl px-6 py-4">
+      <p class="font-bold text-amber-800 mb-1">🔍 本單元的預測輸出重點</p>
+      <p>迴圈<b>跑幾次</b>？變數<b>最後是多少</b>？函式<b>回傳什麼</b>？——請在紙上「當一次電腦」。</p>
+    </div>
+    <p class="mt-8 text-gray-500">← → 鍵或下方按鈕換頁</p>
+  </div>
+</div>
+
+<!-- 1 本單元問題 -->
+<div class="slide-page">
+  <div class="content-card">
+    <div class="h-title">本單元的財金問題</div>
+    <div class="bg-blue-900 text-white rounded-xl p-5 text-xl mb-6">
+      「買賣一次股票，<b>實際要付多少交易成本</b>？一串每日報酬率，<b>累積下來到底賺多少</b>？能不能把這些計算寫成<b>可以重複使用的工具</b>？」
+    </div>
+    <div class="grid md:grid-cols-3 gap-5 text-lg">
+      <div class="bg-gray-50 rounded-lg p-4"><p class="font-bold text-blue-900 mb-1">if 條件判斷</p>手續費未滿 20 元以 20 元計；證交稅只有<b>賣出</b>才收。</div>
+      <div class="bg-gray-50 rounded-lg p-4"><p class="font-bold text-blue-900 mb-1">for / while 迴圈</p>逐日、逐年地重複計算：累積報酬、複利、數上漲天數。</div>
+      <div class="bg-gray-50 rounded-lg p-4"><p class="font-bold text-blue-900 mb-1">def 自訂函式</p>把「交易成本計算」包起來，換個價格、股數就能再用一次。</div>
+    </div>
+    <p class="mt-6 text-base text-gray-600">📌 本講義的交易成本採簡化規則：手續費 0.1425%（最低 20 元）、股票證交稅 0.3%（僅賣出時收取）。</p>
+  </div>
+</div>
+
+<!-- 2 if -->
+<div class="slide-page">
+  <div class="content-card">
+    <div class="h-title">1. if / elif / else：讓程式做判斷</div>
+    <div class="grid md:grid-cols-2 gap-6">
+      <div>
+        <div class="code-block">amount = 10000           <span class="cm"># 成交金額</span>
+fee = amount * 0.001425  <span class="cm"># 14.25</span>
+if fee &lt; 20:
+    fee = 20             <span class="cm"># 最低 20 元</span>
+print(fee)               <span class="cm"># 20</span>
+
+ret = -0.03
+if ret &gt; 0:
+    print("Up")
+elif ret == 0:
+    print("Flat")
+else:
+    print("Down")</div>
+      </div>
+      <div class="text-lg">
+        <p class="font-bold text-red-700 mb-2">三個語法重點</p>
+        <ol class="list-decimal pl-6 space-y-2">
+          <li>條件後面一定要有<b>冒號 <code class="i">:</code></b></li>
+          <li>要執行的程式碼必須<b>縮排</b>（4 個空白）。縮排就是 Python 判斷「哪些程式屬於這個 if」的方式。</li>
+          <li><b>由上往下檢查，第一個成立的就執行，後面的全部跳過</b>。</li>
+        </ol>
+        <p class="font-bold text-blue-900 mt-4 mb-1">比較與邏輯（單元 1 學過）</p>
+        <p><code class="i">==</code> 等於（兩個等號！）、<code class="i">!=</code> 不等於、<code class="i">and</code> 兩者都成立、<code class="i">or</code> 任一成立</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 3 預測輸出 1 -->
+<div class="slide-page">
+  <div class="content-card">
+    <div class="h-title">🔍 預測輸出 1：if 條件判斷</div>
+    <div class="grid md:grid-cols-2 gap-4">
+      <div class="pq"><div class="pq-head">Q1</div>
+<div class="code-block">amount = 30000
+fee = amount * 0.001425
+if fee &lt; 20:
+    fee = 20
+print(fee)</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">42.75</span><br>30000 × 0.001425 = 42.75，已超過 20，所以 if 裡的程式不會執行。</div>
+      </div>
+      <div class="pq"><div class="pq-head">Q2（注意順序）</div>
+<div class="code-block">score = 95
+if score &gt;= 60:
+    grade = "Pass"
+elif score &gt;= 90:
+    grade = "Excellent"
+print(grade)</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">Pass</span><br>95 ≥ 60 已成立，後面的 elif <b>不會再檢查</b>。範圍大的條件放前面，範圍小的條件就永遠輪不到。</div>
+      </div>
+      <div class="pq"><div class="pq-head">Q3</div>
+<div class="code-block">price, ma, vol = 105, 100, 500
+if price &gt; ma and vol &gt; 1000:
+    print("Buy")
+else:
+    print("Wait")</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">Wait</span><br><code class="i">price &gt; ma</code> 成立，但 <code class="i">vol &gt; 1000</code> 不成立；<code class="i">and</code> 要兩個都成立。</div>
+      </div>
+      <div class="pq"><div class="pq-head">Q4</div>
+<div class="code-block">side, amount = "sell", 50000
+tax = 0
+if side == "sell":
+    tax = amount * 0.003
+print(tax)</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">150.0</span><br>賣出才收證交稅：50000 × 0.003 = 150.0（乘上 float，結果是 float）。</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 4 for -->
+<div class="slide-page">
+  <div class="content-card">
+    <div class="h-title">2. for 迴圈：重複做同一件事</div>
+    <div class="grid md:grid-cols-2 gap-6">
+      <div>
+        <p class="font-bold text-blue-900 mb-2">寫法一：直接跑過 list 的每個元素</p>
+        <div class="code-block">for p in [100, 102, 99]:
+    print(p)
+<span class="cm"># 100</span>
+<span class="cm"># 102</span>
+<span class="cm"># 99</span></div>
+        <p class="font-bold text-blue-900 mt-4 mb-2">寫法二：用 range() 產生數字</p>
+        <div class="code-block">total = 0              <span class="cm"># 先歸零</span>
+for i in range(1, 6):  <span class="cm"># 1,2,3,4,5</span>
+    total = total + i  <span class="cm"># 即 total += i</span>
+print(total)           <span class="cm"># 15（沒縮排）</span></div>
+      </div>
+      <div class="text-lg">
+        <table class="t mb-4">
+          <tr><th>寫法</th><th>產生的數字</th></tr>
+          <tr><td><code class="i">range(5)</code></td><td>0, 1, 2, 3, 4</td></tr>
+          <tr><td><code class="i">range(1, 5)</code></td><td>1, 2, 3, 4</td></tr>
+          <tr><td><code class="i">range(0, 10, 3)</code></td><td>0, 3, 6, 9</td></tr>
+        </table>
+        <p class="bg-red-50 border-l-4 border-red-600 p-3 rounded mb-3"><b>和 list 切片一樣：<code class="i">range(a, b)</code> 包含 a、不包含 b</b>。<code class="i">range(1, 5)</code> 只跑 4 次！</p>
+        <p class="bg-blue-50 border-l-4 border-blue-700 p-3 rounded">💡 <b>縮排決定 print 在迴圈內還是外</b>：在迴圈內會印很多次，在迴圈外只印最後結果一次。</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 5 預測輸出 2 -->
+<div class="slide-page">
+  <div class="content-card">
+    <div class="h-title">🔍 預測輸出 2：迴圈跑幾次？</div>
+    <div class="grid md:grid-cols-2 gap-4">
+      <div class="pq"><div class="pq-head">Q1</div>
+<div class="code-block">print(list(range(1, 5)))</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">[1, 2, 3, 4]</span><br>不包含 5。<code class="i">list()</code> 只是把 range 的數字列出來給你看。</div>
+      </div>
+      <div class="pq"><div class="pq-head">Q2</div>
+<div class="code-block">count = 0
+for i in range(0, 10, 3):
+    count += 1
+print(count)</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">4</span><br>i 依序是 0、3、6、9，共 4 次（12 已超過 10）。</div>
+      </div>
+      <div class="pq"><div class="pq-head">Q3</div>
+<div class="code-block">for i in range(3):
+    print(i, end=" ")</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">0 1 2 </span><br><code class="i">range(3)</code> 從 0 開始；<code class="i">end=" "</code> 讓 print 不換行、改用空白隔開。</div>
+      </div>
+      <div class="pq"><div class="pq-head">Q4</div>
+<div class="code-block">fv = 1000
+for year in range(1, 4):
+    fv = fv * 1.1
+print(year, round(fv, 1))</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">3 1331.0</span><br>跑 3 次（year = 1, 2, 3）：1000 → 1100 → 1210 → 1331。迴圈結束後 year 停在最後一個值 3。</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 6 for 財金應用 -->
+<div class="slide-page">
+  <div class="content-card">
+    <div class="h-title">3. for 迴圈的財金應用</div>
+    <div class="grid md:grid-cols-2 gap-6">
+      <div>
+        <p class="font-bold text-blue-900 mb-2">應用一：由每日報酬率算累積價值</p>
+        <div class="code-block">value = 100
+for r in [0.1, -0.1]:     <span class="cm"># 先漲 10%，再跌 10%</span>
+    value = value * (1 + r)
+print(round(value, 2))    <span class="cm"># 99.0，不是 100！</span></div>
+        <p class="mt-2">📉 漲 10% 再跌 10%，<b>不會回到原點</b>。報酬率要用<b>連乘</b>，不能直接相加。</p>
+      </div>
+      <div>
+        <p class="font-bold text-blue-900 mb-2">應用二：用索引比較「今天」和「昨天」</p>
+        <div class="code-block">prices = [100, 102, 99, 105]
+rets = []
+for i in range(1, len(prices)): <span class="cm"># 從1開始</span>
+    r = prices[i] / prices[i-1] - 1
+    rets.append(round(r, 4))
+print(rets)
+<span class="cm"># [0.02, -0.0294, 0.0606]</span></div>
+        <p class="mt-2">💡 4 個價格只能算出 <b>3 個</b>報酬率。從 <code class="i">i = 1</code> 開始，是因為第一天沒有「昨天」可以比。</p>
+      </div>
+    </div>
+    <p class="mt-4 bg-blue-50 border-l-4 border-blue-700 p-3 rounded text-lg">🔗 到了單元 5，pandas 的 <code class="i">pct_change()</code> 一行就能做完應用二。但要看懂它的結果（例如為什麼第一筆是 NaN），就得先懂這個迴圈。</p>
+  </div>
+</div>
+
+<!-- 7 預測輸出 3 -->
+<div class="slide-page">
+  <div class="content-card">
+    <div class="h-title">🔍 預測輸出 3：迴圈裡的財金計算</div>
+    <div class="grid md:grid-cols-3 gap-4">
+      <div class="pq"><div class="pq-head">Q1</div>
+<div class="code-block">v = 100
+for r in [0.5, -0.5]:
+    v = v * (1 + r)
+print(v)</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">75.0</span><br>100 × 1.5 = 150；150 × 0.5 = 75。漲 50% 再跌 50%，虧了 25%！</div>
+      </div>
+      <div class="pq"><div class="pq-head">Q2：數上漲天數</div>
+<div class="code-block">p = [100, 102, 99, 105, 105]
+up = 0
+for i in range(1, len(p)):
+    if p[i] &gt; p[i-1]:
+        up += 1
+print(up)</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">2</span><br>比較 4 次：102&gt;100 ✔、99&gt;102 ✘、105&gt;99 ✔、105&gt;105 ✘（平盤不算漲）。</div>
+      </div>
+      <div class="pq"><div class="pq-head">Q3</div>
+<div class="code-block">p = [100, 102, 99, 105]
+rets = []
+for i in range(1,len(p)):
+    rets.append(p[i]-p[i-1])
+print(len(rets), sum(rets))</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">3 5</span><br>每日漲跌為 2、−3、6，共 3 筆，總和 5（剛好等於 105 − 100）。</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 8 while / break -->
+<div class="slide-page">
+  <div class="content-card">
+    <div class="h-title">4. while 與 break：不知道要跑幾次時</div>
+    <div class="grid md:grid-cols-2 gap-6">
+      <div>
+        <p class="font-bold text-blue-900 mb-2">while：條件成立就一直跑</p>
+        <div class="code-block">money = 100
+years = 0
+while money &lt; 200:        <span class="cm"># 還沒翻倍就繼續</span>
+    money = money * 1.08  <span class="cm"># 年報酬 8%</span>
+    years += 1
+print(years)              <span class="cm"># 10</span></div>
+        <p class="mt-2">💡 「72 法則」估計 72 / 8 = 9 年，實際上要到第 10 年才超過 200（第 9 年約 199.9）。</p>
+      </div>
+      <div>
+        <p class="font-bold text-blue-900 mb-2">break：提早離開迴圈</p>
+        <div class="code-block">for p in [100, 95, 88, 92]:
+    if p &lt; 90:
+        print("Stop loss", p)
+        break             <span class="cm"># 觸發停損就不再往下看</span></div>
+        <p class="mt-3 text-lg">⚠️ <b>while 一定要讓條件有機會變成 False</b>，否則會變成<b>無限迴圈</b>（例如忘了更新 money）。</p>
+        <table class="t mt-3">
+          <tr><th></th><th>適合的情況</th></tr>
+          <tr><td><code class="i">for</code></td><td>知道要跑幾次（幾天、幾年、幾檔股票）</td></tr>
+          <tr><td><code class="i">while</code></td><td>跑到某個條件達成為止（翻倍、還清貸款）</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 9 預測輸出 4 -->
+<div class="slide-page">
+  <div class="content-card">
+    <div class="h-title">🔍 預測輸出 4：while 與 break</div>
+    <div class="grid md:grid-cols-3 gap-4">
+      <div class="pq"><div class="pq-head">Q1</div>
+<div class="code-block">for p in [100, 95, 88, 92]:
+    if p &lt; 90:
+        print("Stop loss", p)
+        break</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">Stop loss 88</span><br>遇到 88 就 break，後面的 92 不會再檢查。</div>
+      </div>
+      <div class="pq"><div class="pq-head">Q2</div>
+<div class="code-block">n = 0
+while n &lt; 10:
+    n += 4
+print(n)</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">12</span><br>n：0 → 4 → 8 → 12。8 &lt; 10 還會再跑一次，所以會「超過」10。</div>
+      </div>
+      <div class="pq"><div class="pq-head">Q3（會發生什麼事？）</div>
+<div class="code-block">k = 0
+while k &lt; 3:
+    print(k)</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">0
+0
+0 ……（無限迴圈）</span><br>k 永遠是 0，條件永遠成立。少了 <code class="i">k += 1</code>。</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 10 def -->
+<div class="slide-page">
+  <div class="content-card">
+    <div class="h-title">5. def：自訂函式</div>
+    <div class="grid md:grid-cols-2 gap-6">
+      <div>
+        <div class="code-block">def period_return(p0, p1):
+    """Period return"""
+    r = (p1 - p0) / p0
+    return r
+
+x = period_return(50, 55)
+print(x)                     <span class="cm"># 0.1</span>
+print(period_return(100, 90)) <span class="cm"># -0.1</span></div>
+        <p class="font-bold text-blue-900 mt-4 mb-2">預設參數：不給就用預設值</p>
+        <div class="code-block">def fee(amount, rate=0.001425):
+    return amount * rate
+
+fee(100000)          <span class="cm"># 142.5（用預設費率）</span>
+fee(100000, 0.0005)  <span class="cm"># 50.0（電子下單折扣）</span></div>
+      </div>
+      <div class="text-lg">
+        <table class="t mb-4">
+          <tr><th>部分</th><th>意義</th></tr>
+          <tr><td><code class="i">def</code></td><td>宣告「我要定義一個函式」</td></tr>
+          <tr><td><code class="i">p0, p1</code></td><td>參數：呼叫時傳進來的值</td></tr>
+          <tr><td><code class="i">return</code></td><td>把結果<b>交回</b>給呼叫的地方，並<b>結束函式</b></td></tr>
+        </table>
+        <p class="bg-red-50 border-l-4 border-red-600 p-3 rounded"><b>return 和 print 不一樣！</b><br><code class="i">print</code> 只是顯示在螢幕上；<code class="i">return</code> 才能把值存進變數、繼續計算。函式沒有 return，就會回傳 <code class="i">None</code>。</p>
+        <p class="mt-3">💡 函式的好處：寫一次，換個價格、股數就能重複使用；AI 寫的程式也大量使用函式，看得懂才能檢查。</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 11 預測輸出 5 -->
+<div class="slide-page">
+  <div class="content-card">
+    <div class="h-title">🔍 預測輸出 5：函式</div>
+    <div class="grid md:grid-cols-2 gap-4">
+      <div class="pq"><div class="pq-head">Q1</div>
+<div class="code-block">def fee(amount, rate=0.001425):
+    return amount * rate
+print(fee(100000), fee(100000, 0.001))</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">142.5 100.0</span><br>第一次用預設費率；第二次傳入的 0.001 取代了預設值。</div>
+      </div>
+      <div class="pq"><div class="pq-head">Q2（print vs. return）</div>
+<div class="code-block">def double(x):
+    print(x * 2)
+y = double(5)
+print(y)</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">10
+None</span><br>函式內的 print 印出 10；但函式沒有 return，所以 y 是 <code class="i">None</code>。</div>
+      </div>
+      <div class="pq"><div class="pq-head">Q3</div>
+<div class="code-block">def check(r):
+    if r &gt; 0:
+        return "Gain"
+    return "Loss or flat"
+print(check(0))</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">Loss or flat</span><br>0 &gt; 0 不成立，跳過第一個 return，執行到第二個 return。</div>
+      </div>
+      <div class="pq"><div class="pq-head">Q4</div>
+<div class="code-block">def g(a, b=2):
+    return a ** b
+print(g(3), g(2, 3))</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">9 8</span><br>g(3) = 3²；g(2, 3) = 2³。參數依照<b>位置</b>對應。</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 12 AI 常犯錯誤 -->
+<div class="slide-page">
+  <div class="content-card">
+    <div class="h-title">⚠️ 本單元的「AI 常犯錯誤」專欄</div>
+    <p class="mb-4 text-lg">這些錯誤<b>程式都能執行</b>，只是答案不對：</p>
+    <div class="grid md:grid-cols-2 gap-4 text-lg">
+      <div class="warn"><b>① 迴圈多跑或少跑一次</b><br><code class="i">range(1, n)</code> 和 <code class="i">range(n)</code> 搞混，複利少算一年、報酬率少一天。<br>👉 檢查：手數迴圈到底跑幾次</div>
+      <div class="warn"><b>② 交易規則沒寫進去</b><br>忘了最低手續費 20 元、買進也收證交稅。<br>👉 檢查：用「很小的金額」和「賣出／買進」各測一次</div>
+      <div class="warn"><b>③ 報酬率直接相加</b><br>+10% 和 −10% 加起來是 0，但實際是虧 1%。<br>👉 檢查：累積報酬要用 <code class="i">(1 + r)</code> 連乘</div>
+      <div class="warn"><b>④ 縮排錯一格</b><br>print 或 return 縮排在迴圈裡，結果只跑了一次就結束，或印出一大串。<br>👉 檢查：每一行屬於哪一層？</div>
+    </div>
+    <p class="mt-2 text-gray-600">🔁 期末考會從這個專欄出題。</p>
+  </div>
+</div>
+
+<!-- 13 綜合 -->
+<div class="slide-page">
+  <div class="content-card">
+    <div class="h-title">🧩 綜合練習：交易成本計算函式</div>
+    <div class="grid md:grid-cols-5 gap-6">
+      <div class="md:col-span-3">
+        <div class="code-block" style="font-size:.92rem;">def trade_cost(price, shares, side="buy"):
+    amount = price * shares
+    fee = amount * 0.001425
+    if fee &lt; 20:
+        fee = 20
+    tax = 0
+    if side == "sell":
+        tax = amount * 0.003
+    return round(fee + tax)
+
+print(trade_cost(10, 100))
+print(trade_cost(50, 1000))
+print(trade_cost(50, 1000, "sell"))
+
+total = 0
+for s in ["buy", "sell"]:
+    total += trade_cost(50, 1000, s)
+print(total)</div>
+      </div>
+      <div class="md:col-span-2">
+        <div class="pq"><div class="pq-head">請寫出完整的 4 行輸出</div>
+          <input placeholder="第 1 行"><input placeholder="第 2 行"><input placeholder="第 3 行"><input placeholder="第 4 行">
+          <button onclick="reveal(this)">顯示答案</button>
+          <div class="ans"><span class="out">20
+71
+221
+292</span><br>① 1000 元的手續費 1.425 → 以 20 計<br>② 50000 × 0.001425 = 71.25 → 71<br>③ 71.25 + 150（證交稅）= 221.25 → 221<br>④ 買 71 + 賣 221 = 292</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 14 AI 協作 -->
+<div class="slide-page">
+  <div class="content-card">
+    <div class="h-title">🤖 課堂活動：請 AI 寫，由你驗收</div>
+    <div class="grid md:grid-cols-2 gap-6 text-lg">
+      <div>
+        <p class="font-bold text-blue-900 mb-2">步驟 1：給 AI 的指令（範例）</p>
+        <div class="bg-gray-100 rounded p-4 mb-4">「請寫一個 Python 函式，輸入買進價、賣出價、股數，回傳扣除交易成本後的淨損益。手續費 0.1425%、最低 20 元，買賣各收一次；證交稅 0.3%，只有賣出時收。」</div>
+        <p class="font-bold text-blue-900 mb-2">步驟 2：執行前，先手算</p>
+        <p>以 50 元買進 1000 股、55 元賣出，淨損益 = ?</p>
+      </div>
+      <div>
+        <p class="font-bold text-blue-900 mb-2">步驟 3：驗收清單</p>
+        <ul class="space-y-2">
+          <li>☐ 函式用的是 <code class="i">return</code>，不是 <code class="i">print</code></li>
+          <li>☐ 手續費<b>買、賣各算一次</b></li>
+          <li>☐ 有最低 20 元的判斷（用 1 股測試看看）</li>
+          <li>☐ 證交稅<b>只</b>在賣出時收</li>
+          <li>☐ 結果和我的手算一致</li>
+        </ul>
+        <div class="pq mt-4"><div class="pq-head">手算答案</div>
+          <button onclick="reveal(this)">顯示答案</button>
+          <div class="ans">毛利 55000 − 50000 = 5000<br>買進手續費 71.25、賣出手續費 78.375、證交稅 165<br>淨損益 ≈ <b>4685 元</b>（交易成本吃掉約 6.3% 的獲利）</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 15 課後練習 -->
+<div class="slide-page">
+  <div class="content-card">
+    <div class="h-title">📝 課後練習</div>
+    <div class="grid md:grid-cols-2 gap-6 text-lg">
+      <div>
+        <p class="font-bold text-blue-900 mb-2">A. 預測輸出（先寫答案，再執行驗證）</p>
+        <div class="code-block" style="font-size:.9rem;"><span class="cm"># A1</span>
+for i in range(2, 8, 2):
+    print(i, end=",")
+<span class="cm"># A2</span>
+x = 0
+for p in [10, 20, 30]:
+    if p &gt; 15:
+        x += p
+print(x)
+<span class="cm"># A3</span>
+m, y = 100, 0
+while m &lt; 150:
+    m = m * 1.1
+    y += 1
+print(y)</div>
+      </div>
+      <div>
+        <p class="font-bold text-blue-900 mb-2">B. 動手做（可以用 AI，但要能解釋每一行）</p>
+        <ol class="list-decimal pl-6 space-y-2">
+          <li>寫一個函式 <code class="i">fv(pv, rate, years)</code>，<b>用 for 迴圈</b>計算複利終值，並和公式 <code class="i">pv * (1 + rate) ** years</code> 比對結果是否相同。</li>
+          <li>給定 <code class="i">p = [50, 52, 49, 47, 51, 53]</code>，用 for + if 算出<b>下跌天數</b>與<b>最大單日跌幅</b>。</li>
+        </ol>
+        <div class="pq mt-4"><div class="pq-head">A 部分答案</div>
+          <button onclick="reveal(this)">顯示答案</button>
+          <div class="ans"><span class="out">A1: 2,4,6,
+A2: 50
+A3: 5</span><br>A3：100 → 110 → 121 → 133.1 → 146.41 → 161.05，第 5 年才超過 150。</div>
+        </div>
+      </div>
+    </div>
+    <p class="mt-4 text-center text-gray-500">下一單元（單元 3）：pandas 入門——DataFrame、讀檔與資料選取</p>
+  </div>
+</div>
+
+</div>
+
+<div class="nav">
+  <button id="prev" onclick="go(-1)">◀ 上一頁</button>
+  <span id="pg" class="font-semibold"></span>
+  <button id="next" onclick="go(1)">下一頁 ▶</button>
+</div>
+
+<script>
+  const pages = document.querySelectorAll('.slide-page');
+  let cur = 0;
+  function show(i){
+    pages[cur].classList.remove('active');
+    cur = Math.max(0, Math.min(pages.length - 1, i));
+    pages[cur].classList.add('active');
+    document.getElementById('pg').textContent = (cur + 1) + ' / ' + pages.length;
+    document.getElementById('prev').disabled = cur === 0;
+    document.getElementById('next').disabled = cur === pages.length - 1;
+  }
+  function go(d){ show(cur + d); }
+  function reveal(btn){
+    const a = btn.parentElement.querySelector('.ans');
+    a.classList.toggle('show');
+    btn.textContent = a.classList.contains('show') ? '隱藏答案' : '顯示答案';
+  }
+  document.addEventListener('keydown', e => {
+    if (e.target.tagName === 'INPUT') return;
+    if (e.key === 'ArrowRight' || e.key === 'PageDown') go(1);
+    if (e.key === 'ArrowLeft'  || e.key === 'PageUp')   go(-1);
+  });
+  show(0);
+</script>
+</body>
+</html>
