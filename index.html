@@ -52,12 +52,17 @@
   <section>
     <div class="flex items-baseline gap-4 mb-4"><h2 class="kicker">課程資料 / DATA</h2><div class="h-px flex-1 bg-gray-200"></div></div>
     <div class="bg-white border border-gray-200 rounded-2xl p-5 sm:p-6">
-      <p class="leading-relaxed">課程資料都放在網站上，在 Colab 裡直接用網址讀取，不需要上傳檔案：</p>
-      <div class="flex justify-end mt-3 mb-1"><button class="copy" id="copyBtn">複製程式碼</button></div>
+      <p class="leading-relaxed">課程資料都放在網站上，在 Colab 裡直接用網址讀取，不需要上傳檔案。</p>
+      <div class="flex items-center justify-between mt-4 mb-1"><span class="font-bold text-gray-900">範例程式碼（以 <code class="i">2330.csv</code> 為例）</span><button class="copy" id="copyBtn">複製程式碼</button></div>
       <div class="code" id="snippet"><span class="k">import</span> pandas <span class="k">as</span> pd
 
 DATA_URL = <span class="s">"https://chadhsu226.github.io/python-finance/data/"</span>
 df = pd.read_csv(DATA_URL + <span class="s">"2330.csv"</span>, parse_dates=[<span class="s">"Date"</span>])</div>
+      <ul class="text-sm text-gray-600 mt-3 leading-relaxed list-disc pl-5">
+        <li><code class="i">DATA_URL</code> 每次都一樣，只要定義一次。</li>
+        <li>要讀其他檔案，把 <code class="i">"2330.csv"</code> 換成下表中的檔名，例如 <code class="i">pd.read_csv(DATA_URL + "mini_stocks.csv")</code>。</li>
+        <li><code class="i">parse_dates=["Date"]</code> 只用在有日期欄的時間序列資料；各檔案實際要加哪些參數，以各單元講義為準。</li>
+      </ul>
       <div class="overflow-x-auto mt-5">
         <table class="d">
           <thead><tr><th>檔案</th><th>內容</th><th>單元</th></tr></thead>
