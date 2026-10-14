@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>單元 0 課程導覽</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  html, body { margin:0; padding:0; height:100%; overflow:hidden; background:#f3f4f6; }
+  .slides-container { position:relative; width:100vw; height:100vh; overflow:hidden; }
+  .slide-page { position:absolute; inset:0; opacity:0; visibility:hidden; transition:opacity .35s ease; z-index:10;
+                display:flex; align-items:center; justify-content:center; padding:2rem 2rem 5rem; }
+  .slide-page.active { opacity:1; visibility:visible; z-index:20; }
+  .content-card { background:#fff; border-radius:1rem; box-shadow:0 10px 15px rgba(0,0,0,.1);
+                  width:100%; max-width:1100px; max-height:100%; overflow-y:auto; padding:2.25rem 2.75rem; }
+  .code-block { background:#1e1e1e; color:#d4d4d4; padding:1rem 1.25rem; border-radius:.5rem;
+                font-family:Consolas, "Courier New", monospace; font-size:1.05rem; line-height:1.6;
+                white-space:pre; overflow-x:auto; }
+  .cm { color:#6a9955; }
+  .h-title { font-size:1.9rem; font-weight:800; color:#1e3a8a; margin-bottom:1rem; }
+  table.t { width:100%; border-collapse:collapse; font-size:1.05rem; }
+  table.t th { background:#1e3a8a; color:#fff; padding:.5rem .75rem; text-align:left; }
+  table.t td { border-bottom:1px solid #e5e7eb; padding:.5rem .75rem; vertical-align:top; }
+  code.i { background:#eef2ff; color:#3730a3; padding:0 .3rem; border-radius:.25rem; font-family:Consolas, monospace; }
+  /* 預測輸出卡片 */
+  .pq { border:2px solid #f59e0b; border-radius:.75rem; padding:1rem 1.25rem; margin-bottom:1rem; background:#fffbeb; }
+  .pq-head { font-weight:700; color:#b45309; margin-bottom:.5rem; }
+  .pq .code-block { font-size:.9rem; padding:.55rem .9rem; line-height:1.5; }
+  .pq { padding:.8rem 1.1rem; margin-bottom:.4rem; }
+  .pq input { width:100%; border:1px solid #d1d5db; border-radius:.4rem; padding:.25rem .6rem; margin-top:.45rem;
+              font-family:Consolas, monospace; font-size:1rem; background:#fff; }
+  .pq button { margin-top:.6rem; background:#b45309; color:#fff; padding:.35rem .9rem; border-radius:.4rem; font-size:.95rem; }
+  .pq button:hover { background:#92400e; }
+  .ans { display:none; margin-top:.6rem; background:#ecfdf5; border-left:4px solid #059669; padding:.6rem .9rem; border-radius:.3rem; }
+  .ans.show { display:block; }
+  .ans .out { font-family:Consolas, monospace; font-weight:700; color:#065f46; white-space:pre; }
+  .warn { border-left:6px solid #dc2626; background:#fef2f2; padding:.9rem 1.1rem; border-radius:.4rem; margin-bottom:.9rem; }
+  .nav { position:fixed; bottom:1rem; left:50%; transform:translateX(-50%); z-index:50; display:flex; gap:1rem; align-items:center;
+         background:rgba(255,255,255,.95); padding:.5rem 1rem; border-radius:999px; box-shadow:0 4px 10px rgba(0,0,0,.12); }
+  .nav button { background:#1e3a8a; color:#fff; padding:.35rem 1rem; border-radius:999px; }
+  .nav button:disabled { background:#9ca3af; }
+  .tag { display:inline-block; font-size:.8rem; font-weight:700; padding:.1rem .6rem; border-radius:999px; margin-right:.4rem; }
+</style>
+</head>
+<body class="font-sans text-gray-800">
+<div class="slides-container" id="slides">
+
+<!-- 0 封面 -->
+<div class="slide-page active">
+  <div class="content-card text-center" style="padding:4rem 3rem;">
+    <p class="text-lg text-gray-500 mb-2">R 與 Python 金融計算｜115 學年度第 1 學期｜單元 0</p>
+    <h1 class="text-5xl font-extrabold text-blue-900 mb-4">課程導覽</h1>
+    <p class="text-2xl text-gray-700 mb-8">Python 是什麼？為什麼要學？要怎麼學？</p>
+    <div class="inline-block text-left bg-blue-50 border-2 border-blue-300 rounded-xl px-6 py-4">
+      <p class="font-bold text-blue-900 mb-1">本單元要回答的問題</p>
+      <ul class="list-disc pl-6">
+        <li>Python 是什麼？「開源」是什麼意思？</li>
+        <li>它和 Excel、SPSS、SAS、MATLAB、R 有什麼不同？</li>
+        <li>前 6 週學的 R，和 Python 有什麼關係？</li>
+        <li>module、package 是什麼？要用什麼環境寫程式？</li>
+      </ul>
+    </div>
+    <p class="mt-8 text-gray-500">← → 鍵或下方按鈕換頁</p>
+  </div>
+</div>
+
+<!-- 1 Python 是什麼 -->
+<div class="slide-page">
+  <div class="content-card">
+    <div class="h-title">1. Python 是什麼？</div>
+    <div class="grid md:grid-cols-2 gap-6 text-lg">
+      <div>
+        <p class="mb-3">Python 是一種<b>通用型程式語言</b>，1991 年由荷蘭工程師 Guido van Rossum 發表。設計理念是「<b>好讀、好寫</b>」：程式看起來很接近英文。</p>
+        <div class="code-block mb-3" style="font-size:.95rem;">price = 100
+if price &gt; 90:
+    print("Expensive")</div>
+        <p>就算沒學過，大概也猜得出這三行在做什麼——這正是 Python 的特色。</p>
+      </div>
+      <div>
+        <p class="font-bold text-blue-900 mb-2">「通用型」：什麼都能做</p>
+        <table class="t mb-3">
+          <tr><th>領域</th><th>例子</th></tr>
+          <tr><td>資料分析</td><td>整理、統計、畫圖（<b>本課程重點</b>）</td></tr>
+          <tr><td>人工智慧</td><td>機器學習、ChatGPT 這類模型的開發</td></tr>
+          <tr><td>自動化</td><td>自動下載資料、整理報表</td></tr>
+          <tr><td>網站、應用程式</td><td>網站後端、小工具</td></tr>
+        </table>
+        <p class="bg-blue-50 border-l-4 border-blue-700 p-3 rounded">💡 在財金業：量化交易、風險管理、資料分析、金融科技等職位，Python 已經是常見的要求條件之一。</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 2 開源 -->
+<div class="slide-page">
+  <div class="content-card">
+    <div class="h-title">2. 「開源」（Open Source）是什麼意思？</div>
+    <div class="grid md:grid-cols-2 gap-6 text-lg">
+      <div>
+        <table class="t mb-3">
+          <tr><th>特性</th><th>意思</th></tr>
+          <tr><td><b>免費</b></td><td>任何人都可以下載、使用，不用買授權</td></tr>
+          <tr><td><b>原始碼公開</b></td><td>程式怎麼寫的，大家都看得到、可以檢查</td></tr>
+          <tr><td><b>社群共同維護</b></td><td>全世界的開發者一起改進、修正錯誤</td></tr>
+          <tr><td><b>套件豐富</b></td><td>別人寫好的工具（套件）可以直接拿來用</td></tr>
+        </table>
+        <p>📦 Python 的官方套件庫 <b>PyPI</b> 上有數十萬個套件。R 的套件庫 <b>CRAN</b> 也是同樣的概念——你在前 6 週已經用過了。</p>
+      </div>
+      <div>
+        <p class="font-bold text-blue-900 mb-2">開源的優點與代價</p>
+        <div class="grid grid-cols-1 gap-3">
+          <div class="bg-green-50 border-l-4 border-green-600 p-3 rounded">✅ <b>優點</b>：免費、更新快、新方法（例如 AI 工具）通常最先出現在 Python</div>
+          <div class="bg-red-50 border-l-4 border-red-600 p-3 rounded">⚠️ <b>代價</b>：沒有官方客服，出問題要自己查、問社群或問 AI；不同版本的套件<b>結果可能不一樣</b>（單元 5 會遇到 pandas 新舊版本的差異）</div>
+        </div>
+        <p class="mt-3">💡 這也是本課程強調「<b>看得懂、驗得了</b>」的原因：工具是免費的，但判斷結果對不對，是你的責任。</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 3 工具比較 -->
+<div class="slide-page">
+  <div class="content-card">
+    <div class="h-title">3. Python 和其他分析工具有什麼不同？</div>
+    <table class="t" style="font-size:.98rem;">
+      <tr><th>工具</th><th>費用</th><th>操作方式</th><th>常見使用領域</th><th>特色</th></tr>
+      <tr><td><b>Excel</b></td><td>付費（Office）</td><td>點選、公式</td><td>幾乎所有辦公室</td><td>上手最快；資料一大、步驟一多就難以檢查與重做</td></tr>
+      <tr><td><b>SPSS</b></td><td>商業授權（貴）</td><td>選單點選為主</td><td>社會科學、問卷分析</td><td>統計檢定方便；彈性較低</td></tr>
+      <tr><td><b>SAS</b></td><td>商業授權（貴）</td><td>程式</td><td>銀行、保險、藥廠</td><td>大型機構傳統主力，穩定、有官方支援</td></tr>
+      <tr><td><b>MATLAB</b></td><td>商業授權（貴）</td><td>程式</td><td>工程、數值計算</td><td>矩陣運算強；資料處理與套件生態較小</td></tr>
+      <tr><td><b>R</b></td><td><b>免費、開源</b></td><td>程式</td><td>統計、學術研究</td><td>統計方法最齊全</td></tr>
+      <tr><td><b>Python</b></td><td><b>免費、開源</b></td><td>程式</td><td>資料分析、AI、各行各業</td><td>通用性最高，資料分析和 AI 的主流語言</td></tr>
+    </table>
+    <div class="grid md:grid-cols-2 gap-6 mt-4 text-lg">
+      <p class="bg-blue-50 border-l-4 border-blue-700 p-3 rounded">💡 <b>「寫程式」最大的好處是可重複</b>：同樣的分析，換一份新資料、換一個月份，程式重跑一次就好；Excel 點選的步驟很難完整重做，也很難讓別人檢查。</p>
+      <p class="bg-gray-50 border-l-4 border-gray-400 p-3 rounded">沒有「最好」的工具，只有<b>適合的情境</b>。工作上可能會遇到任何一種；學會一種程式語言之後，再學其他的會快很多。</p>
+    </div>
+  </div>
+</div>
+
+<!-- 4 R vs Python -->
+<div class="slide-page">
+  <div class="content-card">
+    <div class="h-title">4. 從 R 到 Python：你已經會一半了</div>
+    <div class="grid md:grid-cols-5 gap-6">
+      <div class="md:col-span-3">
+        <table class="t" style="font-size:.98rem;">
+          <tr><th>概念</th><th>R</th><th>Python</th></tr>
+          <tr><td>載入套件</td><td><code class="i">library(xxx)</code></td><td><code class="i">import xxx</code></td></tr>
+          <tr><td>指定變數</td><td><code class="i">x &lt;- 10</code></td><td><code class="i">x = 10</code></td></tr>
+          <tr><td>一串資料</td><td><code class="i">c(10, 20, 30)</code></td><td><code class="i">[10, 20, 30]</code></td></tr>
+          <tr><td>表格</td><td><code class="i">data.frame</code></td><td><code class="i">pandas.DataFrame</code></td></tr>
+          <tr><td>真／假</td><td><code class="i">TRUE</code> / <code class="i">FALSE</code></td><td><code class="i">True</code> / <code class="i">False</code></td></tr>
+          <tr><td>缺值</td><td><code class="i">NA</code></td><td><code class="i">NaN</code> / <code class="i">None</code></td></tr>
+          <tr><td>自訂函式</td><td><code class="i">f &lt;- function(x) {...}</code></td><td><code class="i">def f(x): ...</code></td></tr>
+          <tr><td>程式區塊</td><td>用 <code class="i">{ }</code> 包起來</td><td>用<b>縮排</b>表示</td></tr>
+          <tr><td><b>第一個元素</b></td><td><code class="i">x[1]</code></td><td><code class="i">x[0]</code> ← <b>從 0 開始</b></td></tr>
+          <tr><td><b>取範圍</b></td><td><code class="i">x[1:2]</code> 含第 2 個</td><td><code class="i">x[0:2]</code> <b>不含</b>位置 2</td></tr>
+        </table>
+      </div>
+      <div class="md:col-span-2 text-lg">
+        <p class="mb-3">兩種語言的<b>概念幾乎一樣</b>：變數、向量（list）、表格、函式、套件。差別主要在寫法。</p>
+        <p class="bg-red-50 border-l-4 border-red-600 p-3 rounded mb-3"><b>最容易錯的三件事</b><br>① Python 的位置<b>從 0 開始</b><br>② Python 用<b>縮排</b>決定程式範圍，空白不能亂加<br>③ <code class="i">True</code> 只有第一個字母大寫</p>
+        <p class="text-base text-gray-600">💡 寫 Python 時，R 的習慣會「偷跑」出來，這很正常。下一頁就來試試看。</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 5 預測輸出 R 習慣 -->
+<div class="slide-page">
+  <div class="content-card">
+    <div class="h-title">🔍 預測輸出：小心 R 的習慣</div>
+    <p class="mb-3 text-lg">各題使用 Python 的 <code class="i">x = [10, 20, 30]</code>。想一想：同樣的寫法在 R 裡會得到什麼？</p>
+    <div class="grid md:grid-cols-2 gap-4">
+      <div class="pq"><div class="pq-head">Q1</div>
+<div class="code-block">print(x[1])</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">20</span><br>Python 從 0 開始數，位置 1 是第二個。R 的 <code class="i">x[1]</code> 是 10。</div>
+      </div>
+      <div class="pq"><div class="pq-head">Q2</div>
+<div class="code-block">print(x[0:2])</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">[10, 20]</span><br>包含位置 0、不包含位置 2，只有 2 個元素。</div>
+      </div>
+      <div class="pq"><div class="pq-head">Q3（R 和 Python 完全不同！）</div>
+<div class="code-block">print(x[-1])</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">30</span><br>Python 的 −1 是「<b>最後一個</b>」。R 的 <code class="i">x[-1]</code> 卻是「<b>去掉第一個</b>」，得到 20 30。</div>
+      </div>
+      <div class="pq"><div class="pq-head">Q4</div>
+<div class="code-block">print(len(x), x[2])</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">3 30</span><br>3 個元素，位置是 0、1、2；最後一個是 <code class="i">x[2]</code>。R 寫成 <code class="i">length(x)</code> 和 <code class="i">x[3]</code>。</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 6 module package -->
+<div class="slide-page">
+  <div class="content-card">
+    <div class="h-title">5. module、package、library：別人寫好的工具</div>
+    <div class="grid md:grid-cols-2 gap-6">
+      <div class="text-lg">
+        <table class="t mb-3">
+          <tr><th>名詞</th><th>是什麼</th><th>比喻</th></tr>
+          <tr><td><b>function</b> 函式</td><td>完成一件事的程式</td><td>一把螺絲起子</td></tr>
+          <tr><td><b>module</b> 模組</td><td>一個 <code class="i">.py</code> 檔，裡面有很多函式</td><td>一個工具盒</td></tr>
+          <tr><td><b>package</b> 套件</td><td>很多 module 組成的資料夾</td><td>一整個工具箱</td></tr>
+          <tr><td><b>library</b> 函式庫</td><td>泛稱，常和 package 混用</td><td>工具間</td></tr>
+        </table>
+        <p class="bg-blue-50 border-l-4 border-blue-700 p-3 rounded">💡 實務上不必嚴格區分 module 和 package，記得「<b>要先 import 才能用</b>」就好。</p>
+      </div>
+      <div>
+        <p class="font-bold text-blue-900 mb-2">三種 import 寫法</p>
+        <div class="code-block" style="font-size:.92rem;">import math               <span class="cm"># 整個載入</span>
+math.sqrt(16)             <span class="cm"># 4.0</span>
+
+from math import sqrt     <span class="cm"># 只拿其中一個</span>
+sqrt(25)                  <span class="cm"># 5.0</span>
+
+import pandas as pd       <span class="cm"># 取綽號（慣例）</span>
+pd.read_csv(...)          <span class="cm"># 之後都用 pd</span></div>
+        <p class="font-bold text-blue-900 mt-4 mb-2">安裝 vs. 載入</p>
+        <ul class="list-disc pl-6 space-y-1 text-lg">
+          <li><b>安裝</b>（只要一次）：把工具箱買回家。Colab 已經裝好 pandas、numpy、matplotlib。</li>
+          <li><b>載入</b>（每次都要）：<code class="i">import</code>，把工具箱打開放到桌上。</li>
+          <li>還沒裝的套件：用 <code class="i">pip install</code> 安裝（見第 6 節）</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 7 預測輸出 import -->
+<div class="slide-page">
+  <div class="content-card">
+    <div class="h-title">🔍 預測輸出：import</div>
+    <div class="grid md:grid-cols-2 gap-4">
+      <div class="pq"><div class="pq-head">Q1</div>
+<div class="code-block">import math
+print(math.sqrt(16))</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">4.0</span><br>開根號的結果是 float（有小數點）。</div>
+      </div>
+      <div class="pq"><div class="pq-head">Q2</div>
+<div class="code-block">from math import sqrt
+print(sqrt(25))</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">5.0</span><br>用 from 載入，就不必再寫 <code class="i">math.</code>。</div>
+      </div>
+      <div class="pq"><div class="pq-head">Q3（會發生什麼事？）</div>
+<div class="code-block">print(sqrt(9))
+from math import sqrt</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">NameError: name 'sqrt' is not defined</span><br>程式由上往下執行，<b>還沒 import 就先用</b>了。</div>
+      </div>
+      <div class="pq"><div class="pq-head">Q4（會發生什麼事？）</div>
+<div class="code-block">import pandas as pd
+s = pandas.Series([1, 2])</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">NameError: name 'pandas' is not defined</span><br>取了綽號 pd，就要用 <code class="i">pd.Series</code>。這是初學者最常見的錯誤之一。</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 7b 安裝套件 pip install -->
+<div class="slide-page">
+  <div class="content-card">
+    <div class="h-title">6. 安裝套件：pip install</div>
+    <div class="grid md:grid-cols-2 gap-6">
+      <div class="text-lg">
+        <table class="t mb-3">
+          <tr><th>種類</th><th>例子</th><th>要安裝嗎？</th></tr>
+          <tr><td><b>標準函式庫</b>（跟 Python 一起來）</td><td><code class="i">math</code>、<code class="i">random</code>、<code class="i">datetime</code></td><td>不用，直接 <code class="i">import</code></td></tr>
+          <tr><td><b>第三方套件</b>（從 PyPI 下載）</td><td><code class="i">pandas</code>、<code class="i">numpy</code>、<code class="i">yfinance</code></td><td>先 <code class="i">pip install</code> 再 <code class="i">import</code></td></tr>
+        </table>
+        <div class="code-block" style="font-size:.88rem;"><span class="cm"># Colab：前面加 ! （自己電腦的終端機不用加）</span>
+!pip install twstock
+import twstock</div>
+        <p class="font-bold text-blue-900 mt-3 mb-1">安裝名稱 ≠ import 名稱</p>
+        <table class="t" style="font-size:.95rem;">
+          <tr><th>pip install</th><th>import</th></tr>
+          <tr><td><code class="i">pandas</code></td><td><code class="i">pandas</code>（大多數一樣）</td></tr>
+          <tr><td><code class="i">scikit-learn</code></td><td><code class="i">sklearn</code></td></tr>
+          <tr><td><code class="i">beautifulsoup4</code></td><td><code class="i">bs4</code></td></tr>
+        </table>
+      </div>
+      <div class="text-lg">
+        <div class="warn"><b>⚠️ Colab 的提醒</b><br>Colab 的電腦是借來的：閒置太久或隔天重開，<b>自己裝的套件就不見了</b>，要重新執行 <code class="i">!pip install</code>。pandas、numpy、matplotlib 是 Colab 預先裝好的，不受影響。</div>
+        <div class="warn"><b>⚠️ AI 常犯錯誤</b><br>AI 常把 import 名稱當成安裝名稱，給你 <code class="i">pip install sklearn</code>。正確的是 <code class="i">pip install scikit-learn</code>。</div>
+        <p class="font-bold text-blue-900 mb-1">看錯誤訊息分辨問題</p>
+        <table class="t" style="font-size:.95rem;">
+          <tr><th>錯誤訊息</th><th>通常代表</th></tr>
+          <tr><td><code class="i">ModuleNotFoundError</code></td><td>套件<b>沒安裝</b>，或套件名打錯</td></tr>
+          <tr><td><code class="i">NameError</code></td><td><b>沒 import</b>，或名字打錯（例如綽號用錯）</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 7c 預測輸出 pip -->
+<div class="slide-page">
+  <div class="content-card">
+    <div class="h-title">🔍 預測輸出：安裝與載入</div>
+    <div class="grid md:grid-cols-2 gap-4">
+      <div class="pq"><div class="pq-head">Q5（會發生什麼事？）</div>
+<div class="code-block">import Pandas as pd</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">ModuleNotFoundError: No module named 'Pandas'</span><br>Python 分大小寫，找不到叫 <code class="i">Pandas</code> 的套件。</div>
+      </div>
+      <div class="pq"><div class="pq-head">Q6（會發生什麼事？）</div>
+<div class="code-block">!pip install scikit-learn
+import scikit-learn</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">SyntaxError: invalid syntax</span><br>安裝成功，但 import 名稱是 <code class="i">sklearn</code>。<code class="i">-</code> 會被當成減號，所以是語法錯誤。</div>
+      </div>
+      <div class="pq"><div class="pq-head">Q7（會發生什麼事？）</div>
+<div class="code-block">import math
+print(math.sqrt(4))</div>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">2.0</span><br><code class="i">math</code> 是標準函式庫，不需要 pip install。</div>
+      </div>
+      <div class="pq"><div class="pq-head">Q8（情境題）</div>
+<p class="text-base">昨天在 Colab 執行過 <code class="i">!pip install twstock</code>，今天重新打開筆記本，直接從 <code class="i">import twstock</code> 那一格開始執行。會發生什麼事？</p>
+        <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+        <div class="ans"><span class="out">ModuleNotFoundError: No module named 'twstock'</span><br>Colab 重新連線後，自己裝的套件不見了，要先重跑 <code class="i">!pip install</code> 那一格。</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 8 套件地圖 -->
+<div class="slide-page">
+  <div class="content-card">
+    <div class="h-title">7. 本課程會用到的套件</div>
+    <div class="grid md:grid-cols-2 gap-6 text-lg">
+      <div>
+        <table class="t">
+          <tr><th>套件</th><th>慣用寫法</th><th>用途</th><th>單元</th></tr>
+          <tr><td>（內建）</td><td>—</td><td>變數、list、dict、if、for、def</td><td>1、2</td></tr>
+          <tr><td><b>pandas</b></td><td><code class="i">import pandas as pd</code></td><td>讀檔、表格整理、報酬率</td><td>3–7</td></tr>
+          <tr><td><b>matplotlib</b></td><td><code class="i">import matplotlib.pyplot as plt</code></td><td>畫圖</td><td>5–7</td></tr>
+          <tr><td><b>numpy</b></td><td><code class="i">import numpy as np</code></td><td>數值計算（pandas 的底層）</td><td>6</td></tr>
+        </table>
+        <p class="mt-3 text-base text-gray-600">期末報告如果要自己下載股價，還可以用 <code class="i">yfinance</code> 等套件（需要 <code class="i">!pip install</code>）。</p>
+      </div>
+      <div>
+        <p class="font-bold text-blue-900 mb-2">課程地圖</p>
+        <table class="t">
+          <tr><th>單元</th><th>主題</th></tr>
+          <tr><td>1–2</td><td>Python 基礎：資料型態、運算、list、dict、if、for、函式</td></tr>
+          <tr><td>—</td><td><b>期中考</b></td></tr>
+          <tr><td>3–4</td><td>pandas：橫斷面資料（多家公司的本益比、殖利率）</td></tr>
+          <tr><td>5–6</td><td>時間序列：報酬率、風險</td></tr>
+          <tr><td>7</td><td>策略回測</td></tr>
+          <tr><td>8</td><td>綜合練習與期末報告說明</td></tr>
+          <tr><td>—</td><td><b>期末考</b>，之後兩週完成<b>期末報告</b></td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 9 開發環境 -->
+<div class="slide-page">
+  <div class="content-card">
+    <div class="h-title">8. 開發環境：在哪裡寫 Python？</div>
+    <div class="grid md:grid-cols-2 gap-6 text-lg">
+      <div>
+        <table class="t mb-3">
+          <tr><th>環境</th><th>特色</th></tr>
+          <tr><td><b>Google Colab</b>（本課程使用）</td><td>用瀏覽器就能寫、免安裝；常用套件已經裝好；有 Google 帳號就能用</td></tr>
+          <tr><td>Jupyter Notebook</td><td>和 Colab 長得很像，裝在自己電腦（Anaconda）</td></tr>
+          <tr><td>Spyder、VS Code</td><td>適合寫較長的程式</td></tr>
+        </table>
+        <p class="font-bold text-blue-900 mb-2">開始使用 Colab</p>
+        <ol class="list-decimal pl-6 space-y-1">
+          <li>登入 Google 帳號，打開 <b>colab.research.google.com</b></li>
+          <li>新增筆記本，在程式格輸入程式</li>
+          <li>按 <b>Shift + Enter</b> 執行</li>
+        </ol>
+      </div>
+      <div>
+        <p class="font-bold text-blue-900 mb-2">本課程的資料：直接從網站讀</p>
+        <div class="code-block mb-3" style="font-size:.74rem;">import pandas as pd
+DATA_URL = "https://chadhsu226.github.io/python-finance/data/"
+df = pd.read_csv(DATA_URL + "mini_stocks.csv")</div>
+        <p class="mb-3">不需要下載或上傳檔案（單元 3 開始用到）。</p>
+        <div class="bg-amber-50 border-l-4 border-amber-500 p-3 rounded text-base">
+          <p class="mb-1">⚠️ <b>Colab 小提醒</b></p>
+          <ul class="list-disc pl-5 space-y-1">
+            <li>關掉分頁一段時間後，變數會消失，要<b>從頭重新執行</b>。</li>
+            <li>Colab 內建 AI 助手可以幫你寫程式，但練習「預測輸出」時請<b>先自己想</b>。</li>
+            <li>圖表文字請用英文（Colab 沒有中文字型）。</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 10 為什麼還要學（自單元 1 移入） -->
+<div class="slide-page">
+  <div class="content-card">
+    <div class="h-title">9. AI 都會寫程式了，為什麼還要學 Python？</div>
+    <div class="grid md:grid-cols-2 gap-6 text-lg">
+      <div>
+        <p class="font-bold text-blue-900 mb-2">AI 會寫出「能跑、但算錯」的程式</p>
+        <p class="mb-4">財金資料特別容易出錯：價格被當成文字、百分比和小數搞混、日期沒對齊、用到「未來」的資料……程式不會報錯，只會給你一個<b>看起來很合理的錯誤數字</b>。</p>
+        <p class="font-bold text-blue-900 mb-2">你要當的是「分析師」，AI 是你的助理</p>
+        <p>助理交上來的東西，你得看得懂、抓得出錯、說得出意義。</p>
+      </div>
+      <div>
+        <table class="t">
+          <tr><th>本課程重視</th><th>比較不重視</th></tr>
+          <tr><td>✅ 讀懂程式在做什麼</td><td>背語法</td></tr>
+          <tr><td>✅ 不執行就能預測結果</td><td>從零寫出長程式</td></tr>
+          <tr><td>✅ 判斷結果合不合理</td><td>程式寫得多漂亮</td></tr>
+          <tr><td>✅ 解釋數字的財金意義</td><td>只會截圖交差</td></tr>
+        </table>
+        <p class="mt-4 bg-blue-50 border-l-4 border-blue-700 p-3 rounded">📝 <b>考試為紙筆測驗、不開放 AI</b>。題型以「讀程式、預測輸出、找錯誤」為主，<b>和每個單元的課堂練習一致</b>。</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- 11 學習方式 -->
+<div class="slide-page">
+  <div class="content-card">
+    <div class="h-title">10. 每個單元怎麼上？</div>
+    <div class="grid md:grid-cols-2 gap-6 text-lg">
+      <div>
+        <table class="t">
+          <tr><th>講義區塊</th><th>你要做的事</th></tr>
+          <tr><td>本單元的財金問題</td><td>先知道今天要解決什麼</td></tr>
+          <tr><td>核心程式</td><td>看懂每一行在做什麼</td></tr>
+          <tr><td>🔍 <b>預測輸出</b></td><td><b>先在紙上寫答案，再執行程式對答案</b></td></tr>
+          <tr><td>⚠️ AI 常犯錯誤</td><td>記住這些陷阱（期末考會考）</td></tr>
+          <tr><td>🤖 課堂活動</td><td>請 AI 寫程式，用驗收清單檢查</td></tr>
+          <tr><td>📝 課後練習</td><td>回家再練一次</td></tr>
+        </table>
+      </div>
+      <div>
+        <div class="pq"><div class="pq-head">🔍 試試看：你的第一題預測輸出</div>
+<div class="code-block">price = 100
+if price &gt; 90:
+    print("Expensive")</div>
+          <input placeholder="你的答案"><button onclick="reveal(this)">顯示答案</button>
+          <div class="ans"><span class="out">Expensive</span><br>100 &gt; 90 成立，所以印出 Expensive。恭喜，你已經會讀 Python 了！</div>
+        </div>
+        <p class="mt-4 text-center text-gray-500">下一單元（單元 1）：Python 基礎——資料型態、運算、字串、list 與 dict</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<div class="nav">
+  <button id="prev" onclick="go(-1)">◀ 上一頁</button>
+  <span id="pg" class="font-semibold"></span>
+  <button id="next" onclick="go(1)">下一頁 ▶</button>
+</div>
+
+<script>
+  const pages = document.querySelectorAll('.slide-page');
+  let cur = 0;
+  function show(i){
+    pages[cur].classList.remove('active');
+    cur = Math.max(0, Math.min(pages.length - 1, i));
+    pages[cur].classList.add('active');
+    document.getElementById('pg').textContent = (cur + 1) + ' / ' + pages.length;
+    document.getElementById('prev').disabled = cur === 0;
+    document.getElementById('next').disabled = cur === pages.length - 1;
+  }
+  function go(d){ show(cur + d); }
+  function reveal(btn){
+    const a = btn.parentElement.querySelector('.ans');
+    a.classList.toggle('show');
+    btn.textContent = a.classList.contains('show') ? '隱藏答案' : '顯示答案';
+  }
+  document.addEventListener('keydown', e => {
+    if (e.target.tagName === 'INPUT') return;
+    if (e.key === 'ArrowRight' || e.key === 'PageDown') go(1);
+    if (e.key === 'ArrowLeft'  || e.key === 'PageUp')   go(-1);
+  });
+  show(0);
+</script>
+</body>
+</html>
